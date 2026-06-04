@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Capacitación AMEF | Grupo Transoceánica</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --navy:#002060; --navy-2:#1a3a7d; --navy-deep:#0a1740;
@@ -270,12 +272,50 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 
 .kbd{background:#fef3c7;color:#854d0e;padding:1px 7px;border-radius:4px;font-size:12px;font-weight:600;font-family:Consolas,monospace}
 
-@media(max-width:900px){
-  .layout{grid-template-columns:1fr}
-  .sidebar{position:static;height:auto}
-  .content{padding:24px 18px}
-  .hero-grid,.calc-grid,.case-row,.match-grid{grid-template-columns:1fr}
+/* ===== RESULTADOS ===== */
+.result-card{background:#fff;border-radius:12px;box-shadow:var(--shadow-lg);overflow:hidden;margin-bottom:18px}
+.result-header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 100%);color:#fff;padding:28px 32px}
+.result-header .org{font-size:11px;letter-spacing:2px;opacity:.8;margin-bottom:6px}
+.result-header h3{font-size:22px;font-weight:800;color:#fff;margin-bottom:4px}
+.result-header .sub{font-size:13px;opacity:.85}
+.result-body{padding:24px 32px}
+.result-score-wrap{display:flex;align-items:center;gap:24px;padding:20px;background:var(--bg);border-radius:10px;margin-bottom:20px}
+.result-score-circle{width:90px;height:90px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;font-weight:800}
+.result-score-circle.green{background:#dcfce7;border:4px solid var(--green)}
+.result-score-circle.amber{background:#fef9c3;border:4px solid var(--amber)}
+.result-score-circle.red{background:#fee2e2;border:4px solid var(--red)}
+.result-score-circle .num{font-size:26px;line-height:1;color:var(--navy)}
+.result-score-circle .den{font-size:13px;color:var(--muted)}
+.result-score-info h4{color:var(--navy);font-size:16px;margin-bottom:4px}
+.result-score-info p{font-size:13px;color:var(--muted)}
+.result-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.result-meta-item{background:var(--bg);border-radius:8px;padding:12px}
+.result-meta-item .l{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;margin-bottom:3px}
+.result-meta-item .v{font-size:13px;font-weight:600;color:var(--navy)}
+.result-q-list{margin-bottom:20px}
+.result-q{padding:12px 14px;border-radius:8px;margin-bottom:8px;border-left:4px solid var(--border)}
+.result-q.ok{background:#f0fdf4;border-left-color:var(--green)}
+.result-q.no{background:#fef2f2;border-left-color:var(--red)}
+.result-q .q-text{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.result-q .q-ans{font-size:12px;color:var(--muted)}
+.result-q .q-ans strong{color:var(--navy)}
+.result-q .q-icon{float:right;font-size:16px;margin-top:-2px}
+.result-footer{padding:18px 32px;background:var(--bg);border-top:1px solid var(--border);display:flex;gap:10px;align-items:center}
+
+@media print{
+  .topbar,.sidebar,.progress,.gate,
+  #s0,#s1,#s2,#s3,#s4,#s5,#s6,#s7,#s8,
+  .foot-nav,.result-footer{display:none!important}
+  .layout{display:block!important}
+  .content{padding:0!important;max-width:100%!important}
+  #s9{display:block!important}
+  .result-card{box-shadow:none!important;border:1px solid #ddd}
+  .result-header{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .result-q.ok,.result-q.no{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .result-score-circle{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{margin:1.5cm}
 }
+
 </style>
 </head>
 <body>
@@ -332,6 +372,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
       <button class="nav-item" data-target="s6"><span class="num">6</span> Caso real</button>
       <button class="nav-item" data-target="s7"><span class="num">7</span> Calculadora</button>
       <button class="nav-item" data-target="s8"><span class="num">8</span> Evaluación</button>
+      <button class="nav-item" data-target="s9" id="nav-s9" style="opacity:.4;pointer-events:none"><span class="num">✓</span> Mis resultados</button>
     </aside>
 
     <main class="content">
@@ -798,6 +839,47 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
         </div>
       </section>
 
+      <!-- ===== 9: MIS RESULTADOS ===== -->
+      <section class="section" id="s9">
+        <span class="section-tag">MIS RESULTADOS</span>
+        <h2>Constancia de evaluación</h2>
+        <p class="lead">Aquí quedan guardados los resultados de tu evaluación. Puedes imprimirla o descargarla como constancia de participación.</p>
+
+        <div class="result-card" id="resultCard">
+          <div class="result-header">
+            <div class="org">GRUPO TRANSOCEÁNICA · ASQ-PRO-06</div>
+            <h3>Capacitación AMEF — Gestión de Riesgos en Procesos</h3>
+            <div class="sub">Constancia de evaluación final</div>
+          </div>
+          <div class="result-body">
+            <div class="result-score-wrap">
+              <div class="result-score-circle" id="res-circle">
+                <div class="num" id="res-num">—</div>
+                <div class="den">de 10</div>
+              </div>
+              <div class="result-score-info">
+                <h4 id="res-title">—</h4>
+                <p id="res-msg">—</p>
+              </div>
+            </div>
+            <div class="result-meta">
+              <div class="result-meta-item"><div class="l">Participante</div><div class="v" id="res-nombre">—</div></div>
+              <div class="result-meta-item"><div class="l">Correo</div><div class="v" id="res-correo" style="font-size:12px">—</div></div>
+              <div class="result-meta-item"><div class="l">Unidad</div><div class="v" id="res-unidad">—</div></div>
+              <div class="result-meta-item"><div class="l">Cargo</div><div class="v" id="res-cargo">—</div></div>
+              <div class="result-meta-item"><div class="l">Fecha de evaluación</div><div class="v" id="res-fecha">—</div></div>
+              <div class="result-meta-item"><div class="l">Estado</div><div class="v" id="res-estado">—</div></div>
+            </div>
+            <h4 style="color:var(--navy);font-size:14px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--bg)">Detalle de respuestas</h4>
+            <div class="result-q-list" id="res-preguntas"></div>
+          </div>
+          <div class="result-footer">
+            <button class="btn" onclick="window.print()">🖨️ Imprimir</button>
+            <button class="btn ghost" onclick="ir('s8')">← Volver a la evaluación</button>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 </div>
@@ -817,34 +899,65 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
         <p style="color:var(--red);font-size:13px;min-height:18px" id="admin-err"></p>
       </div>
       <div id="admin-content" style="display:none">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <div><div style="font-size:13px;color:var(--muted)">Participantes</div><div style="font-size:28px;font-weight:800;color:var(--navy)" id="admin-count">0</div></div>
-          <div style="text-align:right"><div style="font-size:13px;color:var(--muted)">Promedio</div><div style="font-size:28px;font-weight:800;color:var(--red)" id="admin-avg">—</div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div>
+            <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Participantes registrados</div>
+            <div style="font-size:32px;font-weight:800;color:var(--navy)" id="admin-count">0</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Promedio del quiz</div>
+            <div style="font-size:32px;font-weight:800;color:var(--red)" id="admin-avg">—</div>
+          </div>
         </div>
-        <div class="admin-actions">
-          <button class="btn" onclick="exportarCSV()">⬇ Exportar CSV</button>
-          <button class="btn alt" onclick="refrescarLista()">↻ Refrescar</button>
-          <button class="btn ghost" onclick="limpiarRegistros()">Limpiar</button>
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+          <button class="btn" onclick="exportarExcel()">⬇ Exportar Excel (.xlsx)</button>
+          <button class="btn alt" onclick="refrescarLista()">↻ Actualizar</button>
+          <button class="btn ghost" onclick="limpiarRegistros()">🗑 Limpiar registros</button>
+          <button class="btn ghost" onclick="abrirExcel()" id="btn-onedrive" style="display:none">📊 Ver en OneDrive</button>
         </div>
-        <table class="tbl-mini">
-          <thead><tr><th>Fecha</th><th>Nombre</th><th>Correo</th><th>Unidad</th><th>Cargo</th><th>Quiz</th><th>Estado</th></tr></thead>
-          <tbody id="admin-tbody"></tbody>
-        </table>
-        <p id="admin-empty" style="text-align:center;color:var(--muted);font-size:13px;margin-top:14px;display:none">Sin participantes registrados.</p>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;padding:8px 12px;background:var(--bg);border-radius:6px">
+          ℹ️ Los resultados se almacenan en este navegador. Para ver registros de todos los participantes, consulta el Excel en OneDrive (si tienes Power Automate configurado).
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl-mini" id="admin-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Unidad</th>
+                <th>Cargo</th>
+                <th style="text-align:center">Quiz</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="admin-tbody"></tbody>
+          </table>
+        </div>
+        <p id="admin-empty" style="text-align:center;color:var(--muted);font-size:13px;margin-top:18px;display:none">
+          No hay resultados registrados en este navegador todavía.
+        </p>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// ⚠️ IMPORTANTE: Cambia esta clave por una propia antes de publicar.
+// ⚠️ PASO 1: Pega aquí la URL de tu flujo de Power Automate (activador HTTP).
+// ⚠️ PASO 2: Pega aquí el enlace directo a tu Excel en OneDrive.
+// ⚠️ PASO 3: Pega aquí tus claves de EmailJS (emailjs.com).
+// ⚠️ PASO 4: Cambia la clave admin antes de publicar.
 // El acceso al panel admin es vía atajo Ctrl+Shift+A (no hay botón visible).
-const ADMIN_KEY = 'Trans0c3@nica-AMEF-2026';
-const STORAGE_KEY_PREFIX = 'amef_participante:';
+const POWER_AUTOMATE_URL  = ''; // ← URL del flujo Power Automate (opcional)
+const EXCEL_URL           = ''; // ← URL del Excel en OneDrive (opcional)
+const EMAILJS_SERVICE_ID  = ''; // ← Tu Service ID de EmailJS
+const EMAILJS_TEMPLATE_ID = ''; // ← Tu Template ID de EmailJS
+const EMAILJS_PUBLIC_KEY  = ''; // ← Tu Public Key de EmailJS
+const ADMIN_KEY = 'Trans0c3@nica-AMEF-2026'; // ← Cambia esta clave
 const TOTAL_SECCIONES = 9;
 
 let participante = null;
-let secciones = ['s0','s1','s2','s3','s4','s5','s6','s7','s8'];
+let secciones = ['s0','s1','s2','s3','s4','s5','s6','s7','s8','s9'];
 let visitadas = new Set(['s0']);
 
 // ===== GLOSARIO (flip cards + match) =====
@@ -1123,13 +1236,113 @@ async function calificarQuiz(){
       fb.innerHTML='<strong>Sin responder.</strong> '+p.e;
     }
   });
+  const pct = correctas / PREGUNTAS.length;
   document.getElementById('quiz-score').textContent = correctas+'/10';
-  document.getElementById('quiz-msg').textContent = correctas>=9?'Excelente dominio.':correctas>=7?'Buen nivel. Repasa las marcadas.':correctas>=5?'Aceptable. Revisa las secciones 2, 3 y 5.':'Conviene revisar la capacitación.';
+  const msg = correctas>=9?'Excelente dominio.':correctas>=7?'Buen nivel. Repasa las marcadas.':correctas>=5?'Aceptable. Revisa las secciones 2, 3 y 5.':'Conviene revisar la capacitación.';
+  document.getElementById('quiz-msg').textContent = msg;
   document.getElementById('quiz-result').classList.add('show');
-  if(participante){participante.quiz={puntaje:correctas,respuestas:[...respuestas],fecha:new Date().toISOString()};await actualizarParticipante();}
+
+  // Guardar en participante
+  if(participante){
+    participante.quiz={puntaje:correctas, respuestas:[...respuestas], fecha:new Date().toISOString()};
+    await actualizarParticipante();
+  }
+
+  // Poblar sección de resultados
+  poblarResultados(correctas, pct, msg);
+
+  // Activar nav item de resultados
+  const navS9 = document.getElementById('nav-s9');
+  if(navS9){ navS9.style.opacity='1'; navS9.style.pointerEvents='auto'; }
+}
+
+function poblarResultados(correctas, pct, msg){
+  // Círculo de puntaje
+  const circle = document.getElementById('res-circle');
+  circle.classList.remove('green','amber','red');
+  circle.classList.add(pct>=0.7?'green':pct>=0.5?'amber':'red');
+  document.getElementById('res-num').textContent = correctas;
+
+  // Título y mensaje
+  const titles = ['Necesita refuerzo','Necesita refuerzo','En proceso','Aceptable','Buen nivel','Excelente'];
+  const idx = Math.min(Math.floor(pct*5), 5);
+  document.getElementById('res-title').textContent = titles[idx];
+  document.getElementById('res-msg').textContent = msg;
+
+  // Datos del participante
+  if(participante){
+    document.getElementById('res-nombre').textContent = participante.nombre || '—';
+    document.getElementById('res-correo').textContent = participante.email || '—';
+    document.getElementById('res-unidad').textContent = participante.area || '—';
+    document.getElementById('res-cargo').textContent = participante.cargo || '—';
+  }
+  const ahora = new Date();
+  document.getElementById('res-fecha').textContent = ahora.toLocaleString('es-EC',{dateStyle:'long',timeStyle:'short'});
+  document.getElementById('res-estado').innerHTML = pct>=0.7
+    ? '<span style="color:var(--green);font-weight:700">✓ Aprobado</span>'
+    : '<span style="color:var(--amber);font-weight:700">En revisión</span>';
+
+  // Detalle de preguntas
+  const container = document.getElementById('res-preguntas');
+  container.innerHTML = PREGUNTAS.map((p,i)=>{
+    const ok = respuestas[i] === p.c;
+    const respuestaTexto = respuestas[i]!==null ? p.o[respuestas[i]] : 'Sin responder';
+    const correctaTexto = p.o[p.c];
+    return `<div class="result-q ${ok?'ok':'no'}">
+      <span class="q-icon">${ok?'✓':'✗'}</span>
+      <div class="q-text">P${i+1}. ${p.q}</div>
+      <div class="q-ans">
+        Tu respuesta: <strong>${respuestaTexto}</strong>
+        ${!ok ? `<br>Respuesta correcta: <strong style="color:var(--green)">${correctaTexto}</strong>` : ''}
+      </div>
+    </div>`;
+  }).join('');
 }
 function reiniciarQuiz(){respuestas=new Array(PREGUNTAS.length).fill(null);document.getElementById('quiz-result').classList.remove('show');renderQuiz()}
-async function finalizar(){if(participante){participante.finalizado=true;participante.fin=new Date().toISOString();await actualizarParticipante();}alert('Capacitación finalizada. Tu registro fue guardado.')}
+// ===== EMAILJS =====
+async function enviarCorreo(){
+  if(!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) return;
+  if(!participante || !participante.quiz) return;
+
+  const correctas = participante.quiz.puntaje;
+  const pct = correctas / PREGUNTAS.length;
+  const estado = pct >= 0.7 ? 'Aprobado ✓' : 'En revisión';
+  const fecha = new Date(participante.quiz.fecha).toLocaleString('es-EC',{dateStyle:'long',timeStyle:'short'});
+
+  const detalle = PREGUNTAS.map((p,i)=>{
+    const resp = participante.quiz.respuestas[i];
+    const ok = resp === p.c;
+    const dada = (resp !== null && resp !== undefined) ? p.o[resp] : 'Sin responder';
+    return `P${i+1}. ${p.q}\n   Respuesta dada: ${dada}\n   Resultado: ${ok ? '✓ Correcto' : '✗ Incorrecto'}${!ok ? `\n   Respuesta correcta: ${p.o[p.c]}` : ''}`;
+  }).join('\n\n');
+
+  try{
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      nombre:  participante.nombre  || '',
+      correo:  participante.email   || '',
+      unidad:  participante.area    || '',
+      cargo:   participante.cargo   || '',
+      fecha:   fecha,
+      puntaje: `${correctas}/10`,
+      estado:  estado,
+      detalle: detalle
+    });
+    console.log('Correo enviado correctamente a mamedina@transoceanica.com.ec');
+  }catch(err){
+    console.warn('Error enviando correo EmailJS:', err);
+  }
+}
+
+async function finalizar(){
+  if(participante){
+    participante.finalizado = true;
+    participante.fin = new Date().toISOString();
+    await actualizarParticipante();
+  }
+  await enviarCorreo();
+  ir('s9');
+}
 
 // ===== NAVEGACIÓN =====
 function ir(id){
@@ -1168,47 +1381,171 @@ async function registrar(){
   initApp();
 }
 async function actualizarParticipante(){
-  if(!participante)return;
-  participante.secciones=Array.from(visitadas);
-  try{if(typeof window.storage!=='undefined'&&window.storage)await window.storage.set(STORAGE_KEY_PREFIX+participante.id,JSON.stringify(participante),true);}catch(e){}
+  if(!participante) return;
+  participante.secciones = Array.from(visitadas);
+
+  // Guardar siempre en localStorage (acumula todos los resultados en este navegador)
+  guardarEnLocal(participante);
+
+  // Enviar también a Power Automate si está configurado
+  if(POWER_AUTOMATE_URL){
+    try{
+      await fetch(POWER_AUTOMATE_URL, {
+        method:'POST', mode:'no-cors',
+        body: JSON.stringify({
+          evento: participante.quiz ? (participante.finalizado ? 'Finalización' : 'Quiz') : 'Registro',
+          id: participante.id,
+          nombre: participante.nombre,
+          correo: participante.email,
+          unidad: participante.area,
+          cargo: participante.cargo,
+          secciones: Array.from(visitadas).length + '/' + TOTAL_SECCIONES,
+          puntaje_quiz: participante.quiz ? participante.quiz.puntaje : '',
+          fecha_quiz: participante.quiz ? participante.quiz.fecha : '',
+          finalizado: participante.finalizado ? 'SI' : 'NO',
+          fecha_fin: participante.fin || '',
+          fecha_registro: participante.inicio
+        })
+      });
+    }catch(e){ console.warn('Error enviando a Power Automate:', e); }
+  }
 }
 
 // ===== ADMIN =====
 function abrirAdmin(){document.getElementById('admin').classList.add('show')}
 function cerrarAdmin(){document.getElementById('admin').classList.remove('show');document.getElementById('admin-login').style.display='block';document.getElementById('admin-content').style.display='none';document.getElementById('admin-pass').value='';document.getElementById('admin-err').textContent=''}
-async function validarAdmin(){const k=document.getElementById('admin-pass').value;if(k!==ADMIN_KEY){document.getElementById('admin-err').textContent='Clave incorrecta.';return;}document.getElementById('admin-login').style.display='none';document.getElementById('admin-content').style.display='block';await refrescarLista()}
-async function obtenerParticipantes(){const list=[];try{if(typeof window.storage!=='undefined'&&window.storage){const r=await window.storage.list(STORAGE_KEY_PREFIX,true);if(r&&r.keys)for(const k of r.keys){try{const v=await window.storage.get(k,true);if(v&&v.value)list.push(JSON.parse(v.value));}catch(e){}}}}catch(e){}return list.sort((a,b)=>a.inicio.localeCompare(b.inicio))}
+async function validarAdmin(){
+  const k=document.getElementById('admin-pass').value;
+  if(k!==ADMIN_KEY){document.getElementById('admin-err').textContent='Clave incorrecta.';return;}
+  document.getElementById('admin-login').style.display='none';
+  document.getElementById('admin-content').style.display='block';
+  if(EXCEL_URL) document.getElementById('btn-onedrive').style.display='inline-block';
+  await refrescarLista();
+}
+function abrirExcel(){
+  if(!EXCEL_URL){alert('Configura EXCEL_URL en el HTML para usar esta función.');return;}
+  window.open(EXCEL_URL,'_blank');
+}
+
+// ===== LOCALSTORAGE =====
+const LS_KEY = 'amef_resultados_v1';
+
+function guardarEnLocal(p){
+  try{
+    const lista = leerDeLocal();
+    const idx = lista.findIndex(x => x.id === p.id);
+    const registro = {
+      id: p.id,
+      fecha_registro: p.inicio || new Date().toISOString(),
+      nombre: p.nombre || '',
+      correo: p.email || '',
+      unidad: p.area || '',
+      cargo: p.cargo || '',
+      secciones: Array.from(visitadas).length + '/' + TOTAL_SECCIONES,
+      puntaje_quiz: p.quiz ? p.quiz.puntaje : '',
+      fecha_quiz: p.quiz ? p.quiz.fecha : '',
+      respuestas_quiz: p.quiz ? p.quiz.respuestas : [],
+      finalizado: p.finalizado ? 'SI' : 'NO',
+      fecha_fin: p.fin || ''
+    };
+    if(idx>=0) lista[idx] = registro;
+    else lista.push(registro);
+    localStorage.setItem(LS_KEY, JSON.stringify(lista));
+  }catch(e){ console.warn('localStorage no disponible:', e); }
+}
+
+function leerDeLocal(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+
 async function refrescarLista(){
-  const list=await obtenerParticipantes();
-  document.getElementById('admin-count').textContent=list.length;
-  const cq=list.filter(p=>p.quiz);
-  document.getElementById('admin-avg').textContent=cq.length?(cq.reduce((a,p)=>a+p.quiz.puntaje,0)/cq.length).toFixed(1)+'/10':'—';
-  const tb=document.getElementById('admin-tbody');tb.innerHTML='';
-  if(!list.length){document.getElementById('admin-empty').style.display='block';return}
+  const list = leerDeLocal();
+  document.getElementById('admin-count').textContent = list.length;
+  const conQuiz = list.filter(p => p.puntaje_quiz !== '' && p.puntaje_quiz !== undefined);
+  if(conQuiz.length){
+    const avg = conQuiz.reduce((a,p)=>a+Number(p.puntaje_quiz),0)/conQuiz.length;
+    document.getElementById('admin-avg').textContent = avg.toFixed(1)+'/10';
+  } else {
+    document.getElementById('admin-avg').textContent = '—';
+  }
+  const tb = document.getElementById('admin-tbody');
+  tb.innerHTML = '';
+  if(!list.length){
+    document.getElementById('admin-empty').style.display='block';
+    return;
+  }
   document.getElementById('admin-empty').style.display='none';
   list.forEach(p=>{
-    const tr=document.createElement('tr');
-    const fecha=new Date(p.inicio).toLocaleString('es-EC',{dateStyle:'short',timeStyle:'short'});
-    const quiz=p.quiz?p.quiz.puntaje+'/10':'—';
-    const estado=p.finalizado?'<span style="color:var(--green);font-weight:600">✓ Finalizado</span>':p.quiz?'<span style="color:var(--amber)">Quiz hecho</span>':`<span style="color:var(--muted)">En curso (${(p.secciones||[]).length}/${TOTAL_SECCIONES})</span>`;
-    tr.innerHTML=`<td>${fecha}</td><td><strong>${p.nombre}</strong></td><td style="font-size:12px;color:var(--muted)">${p.email||'—'}</td><td>${p.area}</td><td>${p.cargo}</td><td style="text-align:center">${quiz}</td><td>${estado}</td>`;
+    const tr = document.createElement('tr');
+    const fecha = p.fecha_registro ? new Date(p.fecha_registro).toLocaleString('es-EC',{dateStyle:'short',timeStyle:'short'}) : '—';
+    const quiz = p.puntaje_quiz!=='' && p.puntaje_quiz!==undefined ? p.puntaje_quiz+'/10' : '—';
+    const aprobado = Number(p.puntaje_quiz) >= 7;
+    const estado = p.finalizado==='SI'
+      ? `<span style="color:var(--green);font-weight:600">✓ ${aprobado?'Aprobado':'Finalizado'}</span>`
+      : p.puntaje_quiz!=='' && p.puntaje_quiz!==undefined
+        ? '<span style="color:var(--amber)">Quiz completado</span>'
+        : `<span style="color:var(--muted)">En curso (${p.secciones||'—'})</span>`;
+    tr.innerHTML=`
+      <td>${fecha}</td>
+      <td><strong>${p.nombre}</strong></td>
+      <td style="font-size:12px;color:var(--muted)">${p.correo||'—'}</td>
+      <td>${p.unidad||'—'}</td>
+      <td>${p.cargo||'—'}</td>
+      <td style="text-align:center;font-weight:700;color:${aprobado&&p.puntaje_quiz!==''?'var(--green)':'var(--navy)'}">${quiz}</td>
+      <td>${estado}</td>`;
     tb.appendChild(tr);
   });
 }
-async function exportarCSV(){
-  const list=await obtenerParticipantes();
-  if(!list.length){alert('No hay participantes registrados.');return}
-  const head=['Fecha inicio','Nombre','Correo','Unidad','Cargo','Secciones','Quiz','Fecha quiz','Finalizado','Fecha fin'];
-  const rows=list.map(p=>[p.inicio,p.nombre,p.email||'',p.area,p.cargo,(p.secciones||[]).length+'/'+TOTAL_SECCIONES,p.quiz?p.quiz.puntaje:'',p.quiz?p.quiz.fecha:'',p.finalizado?'SI':'NO',p.fin||'']);
-  const csv=[head,...rows].map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='participantes_amef_'+new Date().toISOString().slice(0,10)+'.csv';
-  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+
+function exportarExcel(){
+  const list = leerDeLocal();
+  if(!list.length){alert('No hay resultados registrados todavía.');return;}
+
+  // Hoja principal de resultados
+  const headers = ['Fecha Registro','Nombre','Correo','Unidad','Cargo','Secciones','Puntaje Quiz','Fecha Quiz','Finalizado','Fecha Fin'];
+  const filas = list.map(p=>[
+    p.fecha_registro ? new Date(p.fecha_registro).toLocaleString('es-EC') : '',
+    p.nombre, p.correo, p.unidad, p.cargo,
+    p.secciones, p.puntaje_quiz, 
+    p.fecha_quiz ? new Date(p.fecha_quiz).toLocaleString('es-EC') : '',
+    p.finalizado, p.fecha_fin ? new Date(p.fecha_fin).toLocaleString('es-EC') : ''
+  ]);
+
+  // Hoja de detalle de respuestas
+  const headersDetalle = ['Nombre','Correo','Pregunta','Respuesta dada','Respuesta correcta','Resultado'];
+  const filasDetalle = [];
+  list.forEach(p=>{
+    if(!p.respuestas_quiz || !p.respuestas_quiz.length) return;
+    PREGUNTAS.forEach((q,i)=>{
+      const dada = p.respuestas_quiz[i]!==null && p.respuestas_quiz[i]!==undefined ? q.o[p.respuestas_quiz[i]] : 'Sin responder';
+      const correcta = q.o[q.c];
+      const ok = p.respuestas_quiz[i] === q.c;
+      filasDetalle.push([p.nombre, p.correo, `P${i+1}. ${q.q}`, dada, correcta, ok?'Correcto':'Incorrecto']);
+    });
+  });
+
+  const wb = XLSX.utils.book_new();
+
+  // Hoja 1: Resumen
+  const ws1 = XLSX.utils.aoa_to_sheet([headers,...filas]);
+  ws1['!cols'] = [20,22,30,20,20,12,14,20,12,20].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws1, 'Resumen');
+
+  // Hoja 2: Detalle de respuestas
+  if(filasDetalle.length){
+    const ws2 = XLSX.utils.aoa_to_sheet([headersDetalle,...filasDetalle]);
+    ws2['!cols'] = [22,30,60,30,30,12].map(w=>({wch:w}));
+    XLSX.utils.book_append_sheet(wb, ws2, 'Detalle Respuestas');
+  }
+
+  const fecha = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `AMEF_Resultados_${fecha}.xlsx`);
 }
+
 async function limpiarRegistros(){
-  if(!confirm('Esto eliminará TODOS los registros. ¿Continuar?'))return;
-  try{if(typeof window.storage!=='undefined'&&window.storage){const r=await window.storage.list(STORAGE_KEY_PREFIX,true);if(r&&r.keys)for(const k of r.keys){try{await window.storage.delete(k,true)}catch(e){}}}}catch(e){}
+  if(!confirm('Esto eliminará TODOS los registros guardados en este navegador. ¿Continuar?'))return;
+  try{ localStorage.removeItem(LS_KEY); }catch(e){}
   await refrescarLista();
 }
 function descargarHTML(){
