@@ -288,6 +288,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
     <p class="sub">Identificación y gestión de riesgos en procesos según el procedimiento ASQ-PRO-06.</p>
     <label for="g-nombre">Nombre completo</label>
     <input type="text" id="g-nombre" placeholder="Ej. Ana Pérez" autocomplete="name">
+    <label for="g-email">Correo corporativo</label>
+    <input type="email" id="g-email" placeholder="usuario@transoceanica.com.ec" autocomplete="email">
     <label for="g-area">Unidad / célula</label>
     <select id="g-area">
       <option value="">Selecciona tu unidad...</option>
@@ -359,7 +361,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
           <div class="hero-card" onclick="ir('s6')">
             <div class="icon">📋</div>
             <h4>Caso real aplicado</h4>
-            <p>Ficha TCL-ANX-15 paso a paso</p>
+            <p>Control de servicios externos paso a paso</p>
           </div>
           <div class="hero-card" onclick="ir('s5')">
             <div class="icon">🔥</div>
@@ -609,7 +611,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
       <section class="section" id="s6">
         <span class="section-tag">SECCIÓN 6 · CASO REAL</span>
         <h2>Control de Servicios Externos</h2>
-        <p class="lead">Aplicación del AMEF a la ficha <strong>TCL-ANX-15</strong>. Toca cada paso del proceso para ver su análisis completo.</p>
+        <p class="lead">Aplicación del AMEF a un proceso de Control de Servicios Externos. Toca cada paso del proceso para ver su análisis completo.</p>
 
         <div class="tabs">
           <button class="tab active" data-case="c1">1. Selección de proveedores</button>
@@ -825,7 +827,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
           <button class="btn ghost" onclick="limpiarRegistros()">Limpiar</button>
         </div>
         <table class="tbl-mini">
-          <thead><tr><th>Fecha</th><th>Nombre</th><th>Unidad</th><th>Cargo</th><th>Quiz</th><th>Estado</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Nombre</th><th>Correo</th><th>Unidad</th><th>Cargo</th><th>Quiz</th><th>Estado</th></tr></thead>
           <tbody id="admin-tbody"></tbody>
         </table>
         <p id="admin-empty" style="text-align:center;color:var(--muted);font-size:13px;margin-top:14px;display:none">Sin participantes registrados.</p>
@@ -1080,7 +1082,7 @@ const PREGUNTAS = [
   {q:"¿Quién da seguimiento a la implementación y eficacia de las acciones?",o:["El cliente","El Gerente o Jefe del proceso","El Especialista o Coordinador de Procesos","Cualquier colaborador"],c:2,e:"Según el numeral 7.4, el Especialista o Coordinador de Procesos da seguimiento periódico a las acciones. El Gerente o Jefe define las acciones, pero el seguimiento es del rol especialista."},
   {q:"El riesgo residual es:",o:["El riesgo antes de aplicar controles","El riesgo después de aplicar las medidas","Sinónimo de inherente","El de procesos auxiliares"],c:1,e:"El riesgo residual es el nivel que queda después de aplicar todas las medidas de control o mitigación. El riesgo inherente es el que existe antes de aplicar controles."},
   {q:"La ponderación del riesgo residual respecto a la situación actual:",o:["Puede ser mayor","Nunca podrá ser superior","Debe duplicarse","Es indiferente"],c:1,e:"Es una regla absoluta del procedimiento: el riesgo residual nunca podrá ser superior al de la situación actual. Si fuera mayor, las acciones implementadas no estarían siendo eficaces."},
-  {q:"En el caso TCL-ANX-15, 'Contratación de servicios' tuvo SEV=8, OCU=3, DET=3. Su nivel es:",o:["Crítica Alta","Crítica Media","Crítica Baja","No se puede clasificar"],c:2,e:"IPR = 8 × 3 × 3 = 72. Como 72 ≤ 78, se clasifica como Crítica Baja según los umbrales del procedimiento."}
+  {q:"En el proceso de Control de Servicios Externos, 'Contratación de servicios' tuvo SEV=8, OCU=3, DET=3. Su nivel es:",o:["Crítica Alta","Crítica Media","Crítica Baja","No se puede clasificar"],c:2,e:"IPR = 8 × 3 × 3 = 72. Como 72 ≤ 78, se clasifica como Crítica Baja según los umbrales del procedimiento."}
 ];
 let respuestas = new Array(PREGUNTAS.length).fill(null);
 function renderQuiz(){
@@ -1146,15 +1148,19 @@ function ir(id){
 // ===== REGISTRO =====
 async function registrar(){
   const nombre=document.getElementById('g-nombre').value.trim();
+  const email=document.getElementById('g-email').value.trim().toLowerCase();
   const area=document.getElementById('g-area').value;
   const cargo=document.getElementById('g-cargo').value.trim();
   const err=document.getElementById('g-err');
+  const dominioValido = /^[a-z0-9._%+-]+@transoceanica\.com\.ec$/i;
   if(!nombre||nombre.length<3){err.textContent='Ingresa tu nombre completo.';return;}
+  if(!email){err.textContent='Ingresa tu correo corporativo.';return;}
+  if(!dominioValido.test(email)){err.textContent='Solo se permite el acceso con correo @transoceanica.com.ec';return;}
   if(!area){err.textContent='Selecciona tu unidad.';return;}
   if(!cargo){err.textContent='Indica tu cargo o rol.';return;}
   err.textContent='';
   const id='p_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
-  participante={id,nombre,area,cargo,inicio:new Date().toISOString(),secciones:['s0'],quiz:null,finalizado:false};
+  participante={id,nombre,email,area,cargo,inicio:new Date().toISOString(),secciones:['s0'],quiz:null,finalizado:false};
   try{if(typeof window.storage!=='undefined'&&window.storage)await window.storage.set(STORAGE_KEY_PREFIX+id,JSON.stringify(participante),true);}catch(e){}
   document.getElementById('userLabel').textContent=nombre.split(' ')[0]+' · '+area;
   document.getElementById('gate').style.display='none';
@@ -1185,15 +1191,15 @@ async function refrescarLista(){
     const fecha=new Date(p.inicio).toLocaleString('es-EC',{dateStyle:'short',timeStyle:'short'});
     const quiz=p.quiz?p.quiz.puntaje+'/10':'—';
     const estado=p.finalizado?'<span style="color:var(--green);font-weight:600">✓ Finalizado</span>':p.quiz?'<span style="color:var(--amber)">Quiz hecho</span>':`<span style="color:var(--muted)">En curso (${(p.secciones||[]).length}/${TOTAL_SECCIONES})</span>`;
-    tr.innerHTML=`<td>${fecha}</td><td><strong>${p.nombre}</strong></td><td>${p.area}</td><td>${p.cargo}</td><td style="text-align:center">${quiz}</td><td>${estado}</td>`;
+    tr.innerHTML=`<td>${fecha}</td><td><strong>${p.nombre}</strong></td><td style="font-size:12px;color:var(--muted)">${p.email||'—'}</td><td>${p.area}</td><td>${p.cargo}</td><td style="text-align:center">${quiz}</td><td>${estado}</td>`;
     tb.appendChild(tr);
   });
 }
 async function exportarCSV(){
   const list=await obtenerParticipantes();
   if(!list.length){alert('No hay participantes registrados.');return}
-  const head=['Fecha inicio','Nombre','Unidad','Cargo','Secciones','Quiz','Fecha quiz','Finalizado','Fecha fin'];
-  const rows=list.map(p=>[p.inicio,p.nombre,p.area,p.cargo,(p.secciones||[]).length+'/'+TOTAL_SECCIONES,p.quiz?p.quiz.puntaje:'',p.quiz?p.quiz.fecha:'',p.finalizado?'SI':'NO',p.fin||'']);
+  const head=['Fecha inicio','Nombre','Correo','Unidad','Cargo','Secciones','Quiz','Fecha quiz','Finalizado','Fecha fin'];
+  const rows=list.map(p=>[p.inicio,p.nombre,p.email||'',p.area,p.cargo,(p.secciones||[]).length+'/'+TOTAL_SECCIONES,p.quiz?p.quiz.puntaje:'',p.quiz?p.quiz.fecha:'',p.finalizado?'SI':'NO',p.fin||'']);
   const csv=[head,...rows].map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
   const url=URL.createObjectURL(blob);
