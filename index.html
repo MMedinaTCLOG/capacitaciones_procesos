@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capacitación AMEF | Grupo Transoceánica</title>
+<style>
+:root{
+  --navy:#002060; --navy-2:#1a3a7d; --navy-deep:#0a1740;
+  --red:#C00000; --red-2:#e63946;
+  --white:#fff; --bg:#f5f7fa; --border:#e0e4eb;
+  --text:#1a1a2e; --muted:#5b6478;
+  --green:#1a8a4a; --amber:#d97706;
+  --shadow:0 2px 8px rgba(0,32,96,.08);
+  --shadow-lg:0 6px 24px rgba(0,32,96,.15);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;min-height:100vh}
+
+/* ===== GATE ===== */
+.gate{position:fixed;inset:0;background:linear-gradient(135deg,var(--navy-deep) 0%,var(--navy) 50%,#3d2b8a 100%);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.gate-card{background:#fff;border-radius:14px;padding:40px 36px;max-width:440px;width:100%;box-shadow:var(--shadow-lg)}
+.gate-logo{margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid var(--red)}
+.gate-logo span{font-weight:800;letter-spacing:2px;color:var(--navy);font-size:15px}
+.gate h1{font-size:24px;color:var(--navy);margin-bottom:6px;line-height:1.2}
+.gate .sub{color:var(--muted);font-size:14px;margin-bottom:24px}
+.gate label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;margin-top:14px}
+.gate input,.gate select{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;transition:border-color .15s}
+.gate input:focus,.gate select:focus{outline:none;border-color:var(--navy)}
+.gate button{width:100%;margin-top:22px;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s;font-family:inherit}
+.gate button:hover{background:var(--navy-2)}
+.gate .err{color:var(--red);font-size:13px;margin-top:10px;min-height:18px}
+.gate-foot{margin-top:18px;font-size:12px;color:var(--muted);text-align:center}
+.gate-foot a{color:var(--navy);cursor:pointer;text-decoration:underline}
+.gate-ref{font-size:11px;color:var(--muted);margin-top:14px;padding-top:12px;border-top:1px solid var(--border);text-align:center}
+
+/* ===== APP ===== */
+.app{display:none;min-height:100vh}
+.app.active{display:block}
+.topbar{background:var(--navy);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.topbar-brand .title{font-weight:800;font-size:14px;letter-spacing:2px}
+.topbar-brand .sub{font-size:11px;opacity:.75;margin-top:2px;letter-spacing:.3px}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.user-chip{font-size:13px;background:rgba(255,255,255,.1);padding:6px 12px;border-radius:20px;display:flex;align-items:center;gap:7px}
+.user-chip .dot{width:7px;height:7px;background:#4ade80;border-radius:50%}
+.btn-icon{background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;transition:background .15s;font-family:inherit}
+.btn-icon:hover{background:rgba(255,255,255,.12)}
+
+/* Progress bar */
+.progress{height:3px;background:rgba(255,255,255,.15);position:relative}
+.progress-bar{height:100%;background:var(--red);transition:width .4s ease;width:0%}
+
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 59px)}
+.sidebar{background:#fff;border-right:1px solid var(--border);padding:24px 14px;position:sticky;top:59px;height:calc(100vh - 59px);overflow-y:auto}
+.sidebar h4{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:0 10px;margin-bottom:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:7px;cursor:pointer;font-size:13.5px;margin-bottom:2px;transition:all .15s;border:none;background:transparent;width:100%;text-align:left;font-family:inherit;color:var(--text)}
+.nav-item:hover{background:var(--bg)}
+.nav-item.active{background:var(--navy);color:#fff;font-weight:600}
+.nav-item .num{width:22px;height:22px;border-radius:50%;background:var(--bg);color:var(--navy);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.nav-item.active .num{background:var(--red);color:#fff}
+.nav-item.done .num{background:var(--green);color:#fff}
+.nav-item.done .num::after{content:"✓";font-size:13px}
+.nav-item.done .num span{display:none}
+
+.content{padding:36px 44px;max-width:1100px;margin:0 auto;width:100%}
+.section{display:none;animation:fadeIn .35s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.section-tag{display:inline-block;background:var(--red);color:#fff;font-size:11px;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:3px;margin-bottom:12px}
+.section h2{font-size:30px;color:var(--navy);margin-bottom:6px;line-height:1.15}
+.section .lead{font-size:15px;color:var(--muted);margin-bottom:24px;max-width:780px}
+
+/* ===== HERO CARDS (bienvenida) ===== */
+.hero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.hero-card{background:#fff;border-radius:12px;padding:22px;box-shadow:var(--shadow);text-align:center;cursor:pointer;transition:all .2s;border:2px solid transparent}
+.hero-card:hover{transform:translateY(-4px);border-color:var(--navy);box-shadow:var(--shadow-lg)}
+.hero-card .icon{font-size:32px;margin-bottom:8px}
+.hero-card h4{color:var(--navy);font-size:14px;margin-bottom:4px}
+.hero-card p{font-size:12px;color:var(--muted);line-height:1.4}
+
+/* ===== ACORDEÓN ===== */
+.acc{background:#fff;border-radius:10px;box-shadow:var(--shadow);margin-bottom:8px;overflow:hidden;transition:all .2s}
+.acc-head{padding:14px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;transition:background .15s}
+.acc-head:hover{background:var(--bg)}
+.acc-head .label{display:flex;align-items:center;gap:10px}
+.acc-head .badge{background:var(--navy);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:.5px}
+.acc-head h4{color:var(--navy);font-size:15px;margin:0}
+.acc-head .chev{color:var(--navy);font-size:18px;transition:transform .2s}
+.acc.open .chev{transform:rotate(180deg)}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;padding:0 18px}
+.acc.open .acc-body{max-height:500px;padding:0 18px 18px}
+.acc-body p{font-size:13.5px;color:var(--text);line-height:1.6}
+
+/* ===== TABS ===== */
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:18px;overflow-x:auto}
+.tab{background:transparent;border:none;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);font-family:inherit;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s}
+.tab:hover{color:var(--navy)}
+.tab.active{color:var(--navy);border-bottom-color:var(--red)}
+.tab-panel{display:none;animation:fadeIn .25s ease}
+.tab-panel.active{display:block}
+
+/* ===== STEPPER ===== */
+.stepper{background:#fff;border-radius:12px;padding:24px;box-shadow:var(--shadow)}
+.stepper-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:6px;position:relative}
+.stepper-nav::before{content:"";position:absolute;top:50%;left:5%;right:5%;height:2px;background:var(--border);z-index:0}
+.step-dot{width:34px;height:34px;border-radius:50%;background:#fff;border:2px solid var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;position:relative;z-index:1;transition:all .2s;font-family:inherit}
+.step-dot.active{background:var(--navy);border-color:var(--navy);color:#fff;transform:scale(1.1)}
+.step-dot.done{background:var(--green);border-color:var(--green);color:#fff}
+.stepper-content{min-height:200px;padding:14px 4px}
+.stepper-content .code{font-size:11px;color:var(--red);font-weight:700;letter-spacing:1px;margin-bottom:4px}
+.stepper-content h3{color:var(--navy);font-size:20px;margin-bottom:10px}
+.stepper-content p{font-size:14px;line-height:1.65;color:var(--text)}
+.stepper-controls{display:flex;justify-content:space-between;margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
+.stepper-controls button{background:transparent;border:1.5px solid var(--navy);color:var(--navy);padding:8px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.stepper-controls button:hover:not(:disabled){background:var(--navy);color:#fff}
+.stepper-controls button:disabled{opacity:.3;cursor:not-allowed}
+.stepper-controls .primary{background:var(--navy);color:#fff}
+.stepper-controls .primary:hover{background:var(--navy-2)}
+
+/* ===== FLIP CARDS (glosario) ===== */
+.flip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.flip-card{height:160px;perspective:1000px;cursor:pointer}
+.flip-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.flip-card.flipped .flip-inner{transform:rotateY(180deg)}
+.flip-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:10px;padding:18px;display:flex;flex-direction:column;justify-content:center;box-shadow:var(--shadow)}
+.flip-front{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 100%);color:#fff;align-items:center;text-align:center}
+.flip-front .term{font-weight:700;font-size:15px;letter-spacing:.3px}
+.flip-front .hint{font-size:10px;opacity:.7;margin-top:8px;letter-spacing:1px}
+.flip-back{background:#fff;color:var(--text);transform:rotateY(180deg);font-size:12.5px;line-height:1.5;overflow-y:auto;border-top:4px solid var(--red)}
+
+/* ===== ROLE TABS ===== */
+.role-content{background:#fff;border-radius:10px;padding:22px;box-shadow:var(--shadow);min-height:280px}
+.role-content h3{color:var(--navy);font-size:16px;margin-bottom:14px}
+.role-content ul{list-style:none;padding:0}
+.role-content li{padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;display:flex;gap:10px;align-items:flex-start}
+.role-content li:last-child{border-bottom:none}
+.role-content li::before{content:"✓";color:var(--green);font-weight:700;margin-top:1px}
+
+/* ===== SCALE EXPLORER ===== */
+.scale-explorer{background:#fff;border-radius:12px;padding:24px;box-shadow:var(--shadow);margin-bottom:18px}
+.scale-explorer h3{color:var(--navy);font-size:16px;margin-bottom:14px}
+.scale-slider-wrap{padding:10px 0}
+.scale-slider{width:100%;-webkit-appearance:none;appearance:none;height:8px;background:linear-gradient(to right,#86efac 0%,#fde047 40%,#fb923c 65%,#dc2626 100%);border-radius:4px;outline:none}
+.scale-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;background:var(--navy);border-radius:50%;cursor:pointer;border:3px solid #fff;box-shadow:var(--shadow-lg)}
+.scale-slider::-moz-range-thumb{width:24px;height:24px;background:var(--navy);border-radius:50%;cursor:pointer;border:3px solid #fff}
+.scale-ticks{display:flex;justify-content:space-between;margin-top:6px;padding:0 8px;font-size:11px;color:var(--muted)}
+.scale-output{margin-top:18px;padding:18px;background:var(--bg);border-radius:10px;border-left:4px solid var(--navy);transition:all .2s}
+.scale-output .level{font-size:12px;font-weight:800;letter-spacing:1px;color:var(--red)}
+.scale-output .value{font-size:32px;font-weight:800;color:var(--navy);line-height:1;margin:4px 0}
+.scale-output .crit{font-size:13.5px;color:var(--text);line-height:1.5;margin-top:6px}
+
+/* ===== HEATMAP ===== */
+.heatmap{background:#fff;border-radius:12px;padding:24px;box-shadow:var(--shadow);margin-bottom:18px}
+.heatmap-title{text-align:center;font-weight:700;color:var(--navy);font-size:14px;letter-spacing:1px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.heatmap-wrap{display:grid;grid-template-columns:auto 1fr;gap:14px}
+.y-axis-labels{display:flex;flex-direction:column;justify-content:space-between;font-size:11px;font-weight:700;color:var(--navy);padding:30px 8px;letter-spacing:.5px}
+.heatmap-grid{position:relative}
+.x-axis-top{text-align:center;font-size:11px;font-weight:700;color:var(--navy);letter-spacing:.5px;margin-bottom:6px}
+.heatmap-cells{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;min-height:280px;position:relative}
+.cell{border-radius:8px;padding:14px;display:flex;flex-direction:column;justify-content:space-between;font-size:12px;line-height:1.4;cursor:pointer;transition:all .2s;position:relative}
+.cell:hover{transform:scale(1.02);box-shadow:var(--shadow-lg)}
+.cell .range{font-size:18px;font-weight:800;margin-bottom:4px}
+.cell .desc{font-size:11px;opacity:.85}
+.cell .action{font-weight:700;font-size:12px;margin-top:8px;padding-top:6px;border-top:1px solid rgba(0,0,0,.15)}
+.cell.crit{background:#fca5a5;color:#7f1d1d}
+.cell.med{background:#fef08a;color:#854d0e}
+.cell.low{background:#86efac;color:#166534}
+.cell-marker{position:absolute;width:28px;height:28px;border-radius:50%;background:var(--navy);border:3px solid #fff;box-shadow:var(--shadow-lg);transform:translate(-50%,-50%);transition:all .4s ease;z-index:10;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;pointer-events:none;opacity:0}
+.cell-marker.show{opacity:1}
+
+/* ===== CALCULADORA ===== */
+.calc{background:#fff;border-radius:12px;padding:24px;box-shadow:var(--shadow-lg)}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+.calc-input label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--navy)}
+.calc-input .desc{font-size:11px;color:var(--muted);margin-bottom:10px;min-height:30px}
+.calc-input input[type="range"]{width:100%;-webkit-appearance:none;appearance:none;height:6px;background:var(--border);border-radius:3px;outline:none}
+.calc-input input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;background:var(--navy);border-radius:50%;cursor:pointer;border:3px solid #fff;box-shadow:var(--shadow)}
+.calc-input input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--navy);border-radius:50%;cursor:pointer;border:3px solid #fff}
+.calc-input .val{display:flex;align-items:baseline;gap:6px;margin-top:8px}
+.calc-input .val .v{font-size:30px;font-weight:800;color:var(--navy)}
+.calc-input .val .max{font-size:13px;color:var(--muted)}
+.calc-result{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 100%);color:#fff;border-radius:10px;padding:22px;text-align:center}
+.calc-result .npr{font-size:50px;font-weight:800;line-height:1}
+.calc-result .formula{font-size:13px;opacity:.85;margin-top:6px;font-family:Consolas,Menlo,monospace}
+.calc-result .level{display:inline-block;margin-top:12px;padding:6px 18px;border-radius:20px;font-weight:700;font-size:13px;letter-spacing:.5px}
+.lv-low{background:var(--green)}
+.lv-med{background:var(--amber)}
+.lv-high{background:var(--red)}
+.calc-presets{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}
+.preset-btn{background:var(--bg);border:1px solid var(--border);padding:6px 12px;border-radius:18px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s}
+.preset-btn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* ===== MATCH GAME ===== */
+.match-game{background:#fff;border-radius:12px;padding:24px;box-shadow:var(--shadow);margin-bottom:18px}
+.match-game h3{color:var(--navy);font-size:16px;margin-bottom:6px}
+.match-game .desc{font-size:13px;color:var(--muted);margin-bottom:16px}
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.match-col h5{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px}
+.match-item{background:var(--bg);border:2px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:8px;font-size:13px;cursor:pointer;transition:all .15s;user-select:none}
+.match-item:hover{border-color:var(--navy)}
+.match-item.selected{border-color:var(--red);background:#fee2e2}
+.match-item.matched{background:#dcfce7;border-color:var(--green);cursor:default;opacity:.85}
+.match-item.matched::after{content:" ✓";color:var(--green);font-weight:700}
+.match-status{margin-top:14px;padding:10px;border-radius:7px;font-size:13px;text-align:center;font-weight:600;display:none}
+.match-status.show{display:block}
+.match-status.ok{background:#dcfce7;color:#166534}
+.match-status.no{background:#fee2e2;color:#991b1b}
+
+/* ===== CASO CARDS ===== */
+.case-card{background:#fff;border-radius:12px;padding:22px;box-shadow:var(--shadow);margin-bottom:14px}
+.case-card .step-title{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid var(--bg)}
+.case-card .step-title h4{color:var(--navy);font-size:16px;flex:1}
+.case-card .step-title .ipr-badge{background:#86efac;color:#166534;padding:4px 12px;border-radius:14px;font-weight:800;font-size:13px}
+.case-card .step-title .ipr-badge.med{background:#fef08a;color:#854d0e}
+.case-card .step-title .ipr-badge.crit{background:#fca5a5;color:#7f1d1d}
+.case-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+.case-block{background:var(--bg);border-radius:8px;padding:10px 12px}
+.case-block .l{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;margin-bottom:3px}
+.case-block .v{font-size:13px;color:var(--text);line-height:1.4}
+.case-scores{display:flex;gap:8px;margin-top:10px}
+.case-score{flex:1;background:var(--white);border:1.5px solid var(--border);border-radius:7px;padding:8px;text-align:center}
+.case-score .lab{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:1px}
+.case-score .num{font-size:22px;font-weight:800;color:var(--navy);margin-top:2px}
+
+/* ===== QUIZ ===== */
+.quiz-q{background:#fff;border-radius:10px;padding:20px;box-shadow:var(--shadow);margin-bottom:12px}
+.quiz-q h4{color:var(--navy);font-size:15px;margin-bottom:12px}
+.quiz-q .q-num{color:var(--red);font-weight:700;margin-right:6px}
+.quiz-opt{display:block;padding:11px 14px;border:1.5px solid var(--border);border-radius:7px;margin-bottom:6px;cursor:pointer;font-size:14px;transition:all .15s}
+.quiz-opt:hover{border-color:var(--navy);background:#f0f4fb}
+.quiz-opt.selected{border-color:var(--navy);background:#e8eef9}
+.quiz-opt.correct{border-color:var(--green);background:#dcfce7}
+.quiz-opt.wrong{border-color:var(--red);background:#fee2e2}
+.quiz-feedback{margin-top:10px;padding:10px 12px;border-radius:7px;font-size:13px;display:none}
+.quiz-feedback.show{display:block}
+.quiz-feedback.ok{background:#dcfce7;color:#166534}
+.quiz-feedback.no{background:#fee2e2;color:#991b1b}
+.quiz-result{background:linear-gradient(135deg,var(--navy) 0%,var(--red) 100%);color:#fff;border-radius:12px;padding:30px;text-align:center;display:none;margin-top:18px}
+.quiz-result.show{display:block}
+.quiz-result .score{font-size:56px;font-weight:800}
+
+/* ===== ADMIN ===== */
+.admin-overlay{position:fixed;inset:0;background:rgba(10,23,64,.85);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+.admin-overlay.show{display:flex}
+.admin-box{background:#fff;border-radius:12px;max-width:820px;width:100%;max-height:85vh;display:flex;flex-direction:column}
+.admin-head{background:var(--navy);color:#fff;padding:16px 22px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between}
+.admin-head h3{color:#fff;font-size:16px}
+.admin-head button{background:transparent;border:none;color:#fff;font-size:22px;cursor:pointer}
+.admin-body{padding:22px;overflow-y:auto;flex:1}
+.admin-body input[type="password"]{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:7px;font-size:14px}
+.admin-actions{display:flex;gap:8px;margin:14px 0}
+.btn{background:var(--navy);color:#fff;border:none;padding:9px 16px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.btn:hover{background:var(--navy-2)}
+.btn.alt{background:var(--red)}
+.btn.alt:hover{background:var(--red-2)}
+.btn.ghost{background:transparent;color:var(--navy);border:1.5px solid var(--navy)}
+.btn.ghost:hover{background:var(--navy);color:#fff}
+.tbl-mini{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+.tbl-mini th{background:var(--bg);padding:10px;text-align:left;color:var(--navy);font-size:12px;border-bottom:2px solid var(--border)}
+.tbl-mini td{padding:10px;border-bottom:1px solid var(--border)}
+
+/* ===== FOOTER NAV ===== */
+.foot-nav{display:flex;justify-content:space-between;margin-top:30px;padding-top:18px;border-top:1px solid var(--border)}
+.foot-nav button{background:transparent;border:1.5px solid var(--navy);color:var(--navy);padding:9px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.foot-nav button:hover:not(:disabled){background:var(--navy);color:#fff}
+.foot-nav button:disabled{opacity:.3;cursor:not-allowed}
+.foot-nav .next{background:var(--navy);color:#fff}
+.foot-nav .next:hover{background:var(--navy-2);color:#fff}
+
+.kbd{background:#fef3c7;color:#854d0e;padding:1px 7px;border-radius:4px;font-size:12px;font-weight:600;font-family:Consolas,monospace}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto}
+  .content{padding:24px 18px}
+  .hero-grid,.calc-grid,.case-row,.match-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== GATE ===== -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-logo"><span>GRUPO TRANSOCEÁNICA</span></div>
+    <h1>Capacitación AMEF</h1>
+    <p class="sub">Identificación y gestión de riesgos en procesos según el procedimiento ASQ-PRO-06.</p>
+    <label for="g-nombre">Nombre completo</label>
+    <input type="text" id="g-nombre" placeholder="Ej. Ana Pérez" autocomplete="name">
+    <label for="g-area">Unidad / célula</label>
+    <select id="g-area">
+      <option value="">Selecciona tu unidad...</option>
+      <option>División Pasajes</option>
+      <option>División Carga Aérea</option>
+      <option>Procesos Corporativos</option>
+      <option>Otros</option>
+    </select>
+    <label for="g-cargo">Cargo / rol</label>
+    <input type="text" id="g-cargo" placeholder="Ej. Analista de procesos">
+    <button onclick="registrar()">Iniciar capacitación</button>
+    <p class="err" id="g-err"></p>
+    <div class="gate-ref">Basado en: ASQ-PRO-06 · Identificación y Gestión de Riesgos en Procesos · Versión 01</div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="title">GRUPO TRANSOCEÁNICA</div>
+      <div class="sub">Capacitación AMEF · Gestión de Riesgos en Procesos</div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-chip"><span class="dot"></span><span id="userLabel">Participante</span></div>
+      <button class="btn-icon" onclick="descargarHTML()">⬇ Descargar</button>
+    </div>
+  </div>
+  <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h4>Contenido</h4>
+      <button class="nav-item active" data-target="s0"><span class="num">0</span> Inicio</button>
+      <button class="nav-item" data-target="s1"><span class="num">1</span> Conceptos clave</button>
+      <button class="nav-item" data-target="s2"><span class="num">2</span> Política y roles</button>
+      <button class="nav-item" data-target="s3"><span class="num">3</span> Procedimiento</button>
+      <button class="nav-item" data-target="s4"><span class="num">4</span> Escalas</button>
+      <button class="nav-item" data-target="s5"><span class="num">5</span> Mapa de calor</button>
+      <button class="nav-item" data-target="s6"><span class="num">6</span> Caso real</button>
+      <button class="nav-item" data-target="s7"><span class="num">7</span> Calculadora</button>
+      <button class="nav-item" data-target="s8"><span class="num">8</span> Evaluación</button>
+    </aside>
+
+    <main class="content">
+
+      <!-- ===== 0: INICIO ===== -->
+      <section class="section active" id="s0">
+        <span class="section-tag">INICIO</span>
+        <h2>Bienvenido</h2>
+        <p class="lead">Una capacitación práctica e interactiva sobre AMEF, basada en el procedimiento <strong>ASQ-PRO-06</strong>. Explora cada sección a tu ritmo.</p>
+
+        <div class="hero-grid">
+          <div class="hero-card" onclick="ir('s1')">
+            <div class="icon">📖</div>
+            <h4>Aprende los conceptos</h4>
+            <p>Definiciones, política y roles del procedimiento</p>
+          </div>
+          <div class="hero-card" onclick="ir('s4')">
+            <div class="icon">🎚️</div>
+            <h4>Explora las escalas</h4>
+            <p>Interactúa con SEV, OCU y DET</p>
+          </div>
+          <div class="hero-card" onclick="ir('s7')">
+            <div class="icon">🧮</div>
+            <h4>Calcula tu IPR</h4>
+            <p>Calculadora en vivo sobre el mapa de calor</p>
+          </div>
+          <div class="hero-card" onclick="ir('s6')">
+            <div class="icon">📋</div>
+            <h4>Caso real aplicado</h4>
+            <p>Ficha TCL-ANX-15 paso a paso</p>
+          </div>
+          <div class="hero-card" onclick="ir('s5')">
+            <div class="icon">🔥</div>
+            <h4>Mapa de calor</h4>
+            <p>Visualiza dónde cae cada riesgo</p>
+          </div>
+          <div class="hero-card" onclick="ir('s8')">
+            <div class="icon">✅</div>
+            <h4>Evalúa tu aprendizaje</h4>
+            <p>Quiz final con feedback inmediato</p>
+          </div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,var(--navy) 0%,#3d2b8a 100%);color:#fff;border-radius:12px;padding:24px;margin-top:24px">
+          <div style="font-size:11px;letter-spacing:1.5px;opacity:.85">¿SABÍAS QUE?</div>
+          <p style="font-size:15px;margin-top:6px;line-height:1.6">La gestión de riesgo debe realizarse <strong>como mínimo una vez al año</strong>, y siempre que haya cambios relevantes en el contexto, alcance o sistemas de gestión.</p>
+        </div>
+
+        <div class="foot-nav">
+          <button disabled>← Anterior</button>
+          <button class="next" onclick="ir('s1')">Comenzar →</button>
+        </div>
+      </section>
+
+      <!-- ===== 1: CONCEPTOS CLAVE (FLIP CARDS + MATCH) ===== -->
+      <section class="section" id="s1">
+        <span class="section-tag">SECCIÓN 1</span>
+        <h2>Conceptos clave</h2>
+        <p class="lead">Toca cada tarjeta para ver su definición. Cuando termines, prueba el ejercicio de emparejamiento.</p>
+
+        <div class="flip-grid" id="flipGrid"></div>
+
+        <div class="match-game" style="margin-top:24px">
+          <h3>Ejercicio · Empareja término con definición</h3>
+          <p class="desc">Selecciona un término de la izquierda y la definición correcta de la derecha.</p>
+          <div class="match-grid">
+            <div class="match-col">
+              <h5>Términos</h5>
+              <div id="matchTerms"></div>
+            </div>
+            <div class="match-col">
+              <h5>Definiciones</h5>
+              <div id="matchDefs"></div>
+            </div>
+          </div>
+          <div class="match-status" id="matchStatus"></div>
+        </div>
+
+        <div class="foot-nav">
+          <button onclick="ir('s0')">← Anterior</button>
+          <button class="next" onclick="ir('s2')">Siguiente →</button>
+        </div>
+      </section>
+
+      <!-- ===== 2: POLÍTICA Y ROLES (TABS) ===== -->
+      <section class="section" id="s2">
+        <span class="section-tag">SECCIÓN 2</span>
+        <h2>Política y roles</h2>
+        <p class="lead">Quién hace qué en la gestión de riesgos. Toca cada pestaña para ver su responsabilidad.</p>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="t-pol">📌 Política</button>
+          <button class="tab" data-tab="t-ger">👤 Gerentes y Jefes</button>
+          <button class="tab" data-tab="t-esp">⚙️ Especialista / Coordinador</button>
+          <button class="tab" data-tab="t-col">🤝 Todo colaborador</button>
+        </div>
+
+        <div class="tab-panel active" id="t-pol">
+          <div class="role-content">
+            <h3>Política institucional</h3>
+            <ul>
+              <li>La gestión de riesgo se realiza como mínimo una vez al año o cuando haya cambios relevantes.</li>
+              <li>Los líderes deben incluir a su equipo en la identificación y evaluación.</li>
+              <li>Las acciones tienen una fecha máxima de implementación según el nivel de riesgo.</li>
+              <li>Toda acción se evalúa en su eficacia luego de intervalos planificados.</li>
+              <li>Los riesgos se socializan con las partes interesadas.</li>
+              <li>Todo colaborador notifica deficiencias y sugerencias de mejora.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="t-ger">
+          <div class="role-content">
+            <h3>Gerentes y Jefes de proceso</h3>
+            <ul>
+              <li>Asegurar que se identifiquen, evalúen y traten los riesgos del proceso.</li>
+              <li>Incluir al equipo de trabajo en la identificación y evaluación.</li>
+              <li>Definir acciones con fecha máxima de cumplimiento.</li>
+              <li>Socializar los riesgos a las partes interesadas.</li>
+              <li>Justificar y solicitar prórroga si la acción no se cumple a tiempo.</li>
+              <li>Definir nuevas acciones cuando las anteriores no son eficaces.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="t-esp">
+          <div class="role-content">
+            <h3>Especialista y Coordinador de Procesos</h3>
+            <ul>
+              <li>Apoyar técnicamente a Gerentes y Jefes en la gestión de riesgos.</li>
+              <li>Verificar coherencia y consistencia entre análisis de distintos procesos.</li>
+              <li>Recomendar ajustes o mejoras en el tratamiento de riesgos.</li>
+              <li>Dar seguimiento a la implementación y eficacia de las acciones.</li>
+              <li>Documentar el seguimiento en la planificación anual del SG.</li>
+              <li>Asignar nuevas fechas cuando se solicite prórroga justificada.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="t-col">
+          <div class="role-content">
+            <h3>Todo colaborador</h3>
+            <ul>
+              <li>Notificar cualquier deficiencia detectada en el proceso.</li>
+              <li>Comunicar situaciones que indiquen un potencial fallo.</li>
+              <li>Compartir sugerencias de mejora con el Gerente o Jefe.</li>
+              <li>Escalar al Especialista o Coordinador de Procesos cuando corresponda.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="foot-nav">
+          <button onclick="ir('s1')">← Anterior</button>
+          <button class="next" onclick="ir('s3')">Siguiente →</button>
+        </div>
+      </section>
+
+      <!-- ===== 3: PROCEDIMIENTO (STEPPER) ===== -->
+      <section class="section" id="s3">
+        <span class="section-tag">SECCIÓN 3</span>
+        <h2>El procedimiento en 7 pasos</h2>
+        <p class="lead">Recorre cada paso del ciclo completo del ASQ-PRO-06. Usa los controles o toca un número del stepper.</p>
+
+        <div class="stepper">
+          <div class="stepper-nav" id="stepperNav"></div>
+          <div class="stepper-content" id="stepperContent"></div>
+          <div class="stepper-controls">
+            <button id="stepPrev" onclick="prevStep()">← Paso anterior</button>
+            <span id="stepLabel" style="font-size:12px;color:var(--muted);align-self:center"></span>
+            <button id="stepNext" class="primary" onclick="nextStep()">Siguiente paso →</button>
+          </div>
+        </div>
+
+        <div class="foot-nav">
+          <button onclick="ir('s2')">← Anterior</button>
+          <button class="next" onclick="ir('s4')">Siguiente →</button>
+        </div>
+      </section>
+
+      <!-- ===== 4: ESCALAS (TABS + SLIDER) ===== -->
+      <section class="section" id="s4">
+        <span class="section-tag">SECCIÓN 4</span>
+        <h2>Explora las escalas oficiales</h2>
+        <p class="lead">Mueve el control deslizante para ver el criterio de cada valor en cada escala.</p>
+
+        <div class="tabs">
+          <button class="tab active" data-scale="sev">SEVERIDAD</button>
+          <button class="tab" data-scale="ocu">OCURRENCIA</button>
+          <button class="tab" data-scale="det">DETECCIÓN</button>
+        </div>
+
+        <div class="scale-explorer">
+          <h3 id="scaleTitle">Severidad (SEV)</h3>
+          <div class="scale-slider-wrap">
+            <input type="range" id="scaleSlider" class="scale-slider" min="1" max="10" value="5">
+            <div class="scale-ticks">
+              <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+            </div>
+          </div>
+          <div class="scale-output" id="scaleOutput">
+            <div class="level" id="scaleLevel">MODERADA</div>
+            <div class="value" id="scaleValue">5</div>
+            <div class="crit" id="scaleCrit">El fallo produce cierto disgusto e insatisfacción en el cliente. El cliente observará deterioro en el rendimiento del sistema.</div>
+          </div>
+        </div>
+
+        <div style="background:#fef9c3;border-left:4px solid var(--amber);padding:12px 16px;border-radius:0 8px 8px 0;font-size:13.5px;margin-top:14px">
+          <strong style="color:#854d0e">Importante:</strong> en Detección los valores funcionan al revés. <strong>1 es el mejor escenario</strong> (defecto obvio, casi imposible que escape) y <strong>10 es el peor</strong> (no se detecta, llega al cliente final).
+        </div>
+
+        <div class="foot-nav">
+          <button onclick="ir('s3')">← Anterior</button>
+          <button class="next" onclick="ir('s5')">Siguiente →</button>
+        </div>
+      </section>
+
+      <!-- ===== 5: MAPA DE CALOR ===== -->
+      <section class="section" id="s5">
+        <span class="section-tag">SECCIÓN 5</span>
+        <h2>Mapa de calor del IPR</h2>
+        <p class="lead">Cada riesgo cae en una de tres zonas. Toca una celda para ver detalle o pasa a la calculadora para verlo en vivo.</p>
+
+        <div class="heatmap">
+          <div class="heatmap-title">MAPA DE CALOR · CALIDAD DE LOS PROCESOS</div>
+          <div class="heatmap-wrap">
+            <div class="y-axis-labels">
+              <div>SEVERIDAD<br>ALTA</div>
+              <div>SEVERIDAD<br>BAJA</div>
+            </div>
+            <div class="heatmap-grid">
+              <div class="x-axis-top">← OCURRENCIA ALTA &nbsp;·&nbsp; OCURRENCIA BAJA →</div>
+              <div class="heatmap-cells">
+                <div class="cell crit" onclick="cellInfo('crit')">
+                  <div><div class="range">IPR ≥ 150</div><div class="desc">Severidad alta · Ocurrencia alta · Calidad deficiente</div></div>
+                  <div class="action">ACCIÓN DE MEJORA + CONTROL</div>
+                </div>
+                <div class="cell med" onclick="cellInfo('med-sa')">
+                  <div><div class="range">IPR 79-149</div><div class="desc">Severidad alta · Ocurrencia baja · Calidad muy buena</div></div>
+                  <div class="action">ACCIÓN DE CONTROL</div>
+                </div>
+                <div class="cell med" onclick="cellInfo('med-ob')">
+                  <div><div class="range">IPR 79-149</div><div class="desc">Severidad baja · Ocurrencia alta · Calidad muy buena</div></div>
+                  <div class="action">ACCIÓN DE CONTROL</div>
+                </div>
+                <div class="cell low" onclick="cellInfo('low')">
+                  <div><div class="range">IPR ≤ 78</div><div class="desc">Severidad baja · Ocurrencia baja · Calidad muy buena</div></div>
+                  <div class="action">OPORTUNIDAD DE MEJORA</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="cellDetail" style="display:none;background:#fff;border-radius:10px;padding:18px 22px;box-shadow:var(--shadow);margin-bottom:18px;border-left:4px solid var(--navy);animation:fadeIn .3s">
+          <h3 id="cellTitle" style="color:var(--navy);font-size:16px;margin-bottom:8px"></h3>
+          <p id="cellText" style="font-size:14px;color:var(--text);line-height:1.6"></p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border-radius:10px;padding:18px;box-shadow:var(--shadow);border-top:4px solid var(--navy)">
+            <h4 style="color:var(--navy);font-size:14px;margin-bottom:6px">Riesgo inherente</h4>
+            <p style="font-size:13px;color:var(--text);line-height:1.5">El IPR <strong>antes</strong> de aplicar acciones. Es la situación actual.</p>
+          </div>
+          <div style="background:#fff;border-radius:10px;padding:18px;box-shadow:var(--shadow);border-top:4px solid var(--red)">
+            <h4 style="color:var(--navy);font-size:14px;margin-bottom:6px">Riesgo residual</h4>
+            <p style="font-size:13px;color:var(--text);line-height:1.5">El IPR <strong>después</strong> de las acciones. Nunca puede ser mayor al inherente.</p>
+          </div>
+        </div>
+
+        <div class="foot-nav">
+          <button onclick="ir('s4')">← Anterior</button>
+          <button class="next" onclick="ir('s6')">Siguiente →</button>
+        </div>
+      </section>
+
+      <!-- ===== 6: CASO REAL ===== -->
+      <section class="section" id="s6">
+        <span class="section-tag">SECCIÓN 6 · CASO REAL</span>
+        <h2>Control de Servicios Externos</h2>
+        <p class="lead">Aplicación del AMEF a la ficha <strong>TCL-ANX-15</strong>. Toca cada paso del proceso para ver su análisis completo.</p>
+
+        <div class="tabs">
+          <button class="tab active" data-case="c1">1. Selección de proveedores</button>
+          <button class="tab" data-case="c2">2. Compra administrativa</button>
+          <button class="tab" data-case="c3">3. Contratación de servicios</button>
+        </div>
+
+        <div class="tab-panel active" id="c1">
+          <div class="case-card">
+            <div class="step-title">
+              <h4>Selección y registro de proveedores</h4>
+              <span class="ipr-badge">IPR 72 · CRÍTICA BAJA</span>
+            </div>
+            <div class="case-row">
+              <div class="case-block"><div class="l">MODO DE FALLA</div><div class="v">No se realiza la validación a fondo del proveedor</div></div>
+              <div class="case-block"><div class="l">EFECTO</div><div class="v">Se contrata a un proveedor que no cumple los requisitos solicitados</div></div>
+            </div>
+            <div class="case-row">
+              <div class="case-block"><div class="l">CAUSA</div><div class="v">El analista no examina los datos correctamente o las páginas gubernamentales no están activas al momento de revisión</div></div>
+              <div class="case-block"><div class="l">CONTROL EXISTENTE</div><div class="v">Revisión documental básica y periódica desde compras y contabilidad</div></div>
+            </div>
+            <div class="case-scores">
+              <div class="case-score"><div class="lab">SEV</div><div class="num">9</div></div>
+              <div class="case-score"><div class="lab">OCU</div><div class="num">2</div></div>
+              <div class="case-score"><div class="lab">DET</div><div class="num">4</div></div>
+              <div class="case-score" style="background:#dcfce7;border-color:var(--green)"><div class="lab">IPR</div><div class="num" style="color:#166534">72</div></div>
+            </div>
+            <div class="case-block" style="margin-top:12px;background:#dbeafe">
+              <div class="l">ACCIÓN RECOMENDADA</div>
+              <div class="v">Aplicar formato de validación de proveedor (FTP) en cada alta nueva. Responsable: Coordinación de Compras.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="c2">
+          <div class="case-card">
+            <div class="step-title">
+              <h4>Gestión de compra administrativa</h4>
+              <span class="ipr-badge">IPR 9 · CRÍTICA BAJA</span>
+            </div>
+            <div class="case-row">
+              <div class="case-block"><div class="l">MODO DE FALLA</div><div class="v">No encontrar el producto solicitado</div></div>
+              <div class="case-block"><div class="l">EFECTO</div><div class="v">Pérdida de tiempo del equipo de compras e incumplimiento ante el solicitante</div></div>
+            </div>
+            <div class="case-row">
+              <div class="case-block"><div class="l">CAUSA</div><div class="v">Producto no existe en el mercado nacional</div></div>
+              <div class="case-block"><div class="l">CONTROL EXISTENTE</div><div class="v">Búsqueda de productos sustitutos o alternativos</div></div>
+            </div>
+            <div class="case-scores">
+              <div class="case-score"><div class="lab">SEV</div><div class="num">9</div></div>
+              <div class="case-score"><div class="lab">OCU</div><div class="num">1</div></div>
+              <div class="case-score"><div class="lab">DET</div><div class="num">1</div></div>
+              <div class="case-score" style="background:#dcfce7;border-color:var(--green)"><div class="lab">IPR</div><div class="num" style="color:#166534">9</div></div>
+            </div>
+            <div class="case-block" style="margin-top:12px;background:#dbeafe">
+              <div class="l">ACCIÓN RECOMENDADA</div>
+              <div class="v">Mantener controles existentes para identificar productos sustitutos. Responsable: Coordinación de Compras.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="c3">
+          <div class="case-card">
+            <div class="step-title">
+              <h4>Contratación de servicios</h4>
+              <span class="ipr-badge">IPR 72 · CRÍTICA BAJA</span>
+            </div>
+            <div class="case-row">
+              <div class="case-block"><div class="l">MODO DE FALLA</div><div class="v">El proveedor no cumple tiempos de respuesta, parámetros de calidad o compromisos de pago</div></div>
+              <div class="case-block"><div class="l">EFECTO</div><div class="v">Insatisfacción del cliente interno y externo, tiempos de atención más largos</div></div>
+            </div>
+            <div class="case-row">
+              <div class="case-block"><div class="l">CAUSA</div><div class="v">Falta de información en el análisis previo a la contratación; sanciones no establecidas para incumplimientos</div></div>
+              <div class="case-block"><div class="l">CONTROL EXISTENTE</div><div class="v">Investigación de antecedentes; FTA previa; evaluación antes, durante y después</div></div>
+            </div>
+            <div class="case-scores">
+              <div class="case-score"><div class="lab">SEV</div><div class="num">8</div></div>
+              <div class="case-score"><div class="lab">OCU</div><div class="num">3</div></div>
+              <div class="case-score"><div class="lab">DET</div><div class="num">3</div></div>
+              <div class="case-score" style="background:#dcfce7;border-color:var(--green)"><div class="lab">IPR</div><div class="num" style="color:#166534">72</div></div>
+            </div>
+            <div class="case-block" style="margin-top:12px;background:#dbeafe">
+              <div class="l">ACCIÓN RECOMENDADA</div>
+              <div class="v">Establecer requisitos mandatorios y consecuencias por incumplimiento. Formalizar procedimiento de evaluación de proveedores. Responsable: División Pasajes.</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#fef9c3;border-left:4px solid var(--amber);padding:12px 16px;border-radius:0 8px 8px 0;font-size:13.5px;margin-top:14px">
+          <strong style="color:#854d0e">Lectura crítica:</strong> aunque los tres IPR caen en Crítica Baja, la Severidad alta (≥8) en los tres pasos amerita mantener controles vigentes. Si la Ocurrencia subiera por aumento de volumen, podrían escalar a Crítica Media.
+        </div>
+
+        <div class="foot-nav">
+          <button onclick="ir('s5')">← Anterior</button>
+          <button class="next" onclick="ir('s7')">Siguiente →</button>
+        </div>
+      </section>
+
+      <!-- ===== 7: CALCULADORA + MAPA ===== -->
+      <section class="section" id="s7">
+        <span class="section-tag">SECCIÓN 7 · PRÁCTICA</span>
+        <h2>Calculadora IPR en vivo</h2>
+        <p class="lead">Mueve los controles y observa cómo tu IPR aparece sobre el mapa de calor en tiempo real.</p>
+
+        <div class="calc">
+          <div class="calc-grid">
+            <div class="calc-input">
+              <label>SEV · Severidad</label>
+              <div class="desc" id="d-s">Gravedad del efecto.</div>
+              <input type="range" id="r-s" min="1" max="10" value="5" oninput="actualizarCalc()">
+              <div class="val"><span class="v" id="v-s">5</span><span class="max">/10</span></div>
+            </div>
+            <div class="calc-input">
+              <label>OCU · Ocurrencia</label>
+              <div class="desc" id="d-o">Frecuencia de la causa.</div>
+              <input type="range" id="r-o" min="1" max="10" value="5" oninput="actualizarCalc()">
+              <div class="val"><span class="v" id="v-o">5</span><span class="max">/10</span></div>
+            </div>
+            <div class="calc-input">
+              <label>DET · Detección</label>
+              <div class="desc" id="d-d">Capacidad del control.</div>
+              <input type="range" id="r-d" min="1" max="10" value="5" oninput="actualizarCalc()">
+              <div class="val"><span class="v" id="v-d">5</span><span class="max">/10</span></div>
+            </div>
+          </div>
+          <div class="calc-result">
+            <div style="font-size:11px;letter-spacing:1.5px;opacity:.85">ÍNDICE DE PRIORIDAD DE RIESGO</div>
+            <div class="npr" id="v-npr">125</div>
+            <div class="formula" id="v-formula">IPR = 5 × 5 × 5</div>
+            <div class="level lv-med" id="v-level">CRÍTICA MEDIA</div>
+            <div style="font-size:13px;margin-top:12px;opacity:.95" id="v-recom">Tratables emergentes. Planificar tratamiento a mediano plazo (no mayor a 5 meses).</div>
+          </div>
+          <div class="calc-presets">
+            <button class="preset-btn" onclick="setPreset(9,2,4)">Selección proveedores (9·2·4)</button>
+            <button class="preset-btn" onclick="setPreset(9,1,1)">Compra administrativa (9·1·1)</button>
+            <button class="preset-btn" onclick="setPreset(8,3,3)">Contratación servicios (8·3·3)</button>
+            <button class="preset-btn" onclick="setPreset(10,8,9)">Riesgo crítico (10·8·9)</button>
+            <button class="preset-btn" onclick="setPreset(2,1,1)">Controlado (2·1·1)</button>
+          </div>
+        </div>
+
+        <div class="heatmap" style="margin-top:18px">
+          <div class="heatmap-title">UBICACIÓN DE TU IPR EN EL MAPA</div>
+          <div class="heatmap-wrap">
+            <div class="y-axis-labels">
+              <div>SEV ALTA</div>
+              <div>SEV BAJA</div>
+            </div>
+            <div class="heatmap-grid">
+              <div class="x-axis-top">← OCU ALTA &nbsp;·&nbsp; OCU BAJA →</div>
+              <div class="heatmap-cells">
+                <div class="cell crit"><div><div class="range">≥150</div></div><div class="action">CRÍTICA ALTA</div></div>
+                <div class="cell med"><div><div class="range">79-149</div></div><div class="action">CRÍTICA MEDIA</div></div>
+                <div class="cell med"><div><div class="range">79-149</div></div><div class="action">CRÍTICA MEDIA</div></div>
+                <div class="cell low"><div><div class="range">≤78</div></div><div class="action">CRÍTICA BAJA</div></div>
+                <div class="cell-marker show" id="marker">●</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot-nav">
+          <button onclick="ir('s6')">← Anterior</button>
+          <button class="next" onclick="ir('s8')">Siguiente →</button>
+        </div>
+      </section>
+
+      <!-- ===== 8: QUIZ ===== -->
+      <section class="section" id="s8">
+        <span class="section-tag">SECCIÓN 8 · EVALUACIÓN</span>
+        <h2>Evaluación final</h2>
+        <p class="lead">10 preguntas con feedback inmediato. Tu puntaje se registra para el coordinador.</p>
+        <div id="quiz-container"></div>
+        <button class="btn" onclick="calificarQuiz()" style="margin-top:14px;padding:13px 24px;font-size:14px">Calificar evaluación</button>
+        <div class="quiz-result" id="quiz-result">
+          <div style="font-size:12px;letter-spacing:1.5px;opacity:.9">TU PUNTAJE</div>
+          <div class="score" id="quiz-score">0/10</div>
+          <div style="font-size:15px;margin-top:8px" id="quiz-msg"></div>
+          <button class="btn" onclick="reiniciarQuiz()" style="margin-top:18px;background:#fff;color:var(--navy)">Volver a intentar</button>
+        </div>
+        <div class="foot-nav">
+          <button onclick="ir('s7')">← Anterior</button>
+          <button class="next" onclick="finalizar()">Finalizar →</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===== ADMIN ===== -->
+<div class="admin-overlay" id="admin">
+  <div class="admin-box">
+    <div class="admin-head">
+      <h3>Panel del coordinador</h3>
+      <button onclick="cerrarAdmin()">×</button>
+    </div>
+    <div class="admin-body">
+      <div id="admin-login">
+        <p style="font-size:14px;color:var(--muted);margin-bottom:14px">Ingresa la clave del coordinador.</p>
+        <input type="password" id="admin-pass" placeholder="Clave del coordinador" onkeypress="if(event.key==='Enter')validarAdmin()">
+        <div class="admin-actions"><button class="btn" onclick="validarAdmin()">Acceder</button></div>
+        <p style="color:var(--red);font-size:13px;min-height:18px" id="admin-err"></p>
+      </div>
+      <div id="admin-content" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div><div style="font-size:13px;color:var(--muted)">Participantes</div><div style="font-size:28px;font-weight:800;color:var(--navy)" id="admin-count">0</div></div>
+          <div style="text-align:right"><div style="font-size:13px;color:var(--muted)">Promedio</div><div style="font-size:28px;font-weight:800;color:var(--red)" id="admin-avg">—</div></div>
+        </div>
+        <div class="admin-actions">
+          <button class="btn" onclick="exportarCSV()">⬇ Exportar CSV</button>
+          <button class="btn alt" onclick="refrescarLista()">↻ Refrescar</button>
+          <button class="btn ghost" onclick="limpiarRegistros()">Limpiar</button>
+        </div>
+        <table class="tbl-mini">
+          <thead><tr><th>Fecha</th><th>Nombre</th><th>Unidad</th><th>Cargo</th><th>Quiz</th><th>Estado</th></tr></thead>
+          <tbody id="admin-tbody"></tbody>
+        </table>
+        <p id="admin-empty" style="text-align:center;color:var(--muted);font-size:13px;margin-top:14px;display:none">Sin participantes registrados.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ⚠️ IMPORTANTE: Cambia esta clave por una propia antes de publicar.
+// El acceso al panel admin es vía atajo Ctrl+Shift+A (no hay botón visible).
+const ADMIN_KEY = 'Trans0c3@nica-AMEF-2026';
+const STORAGE_KEY_PREFIX = 'amef_participante:';
+const TOTAL_SECCIONES = 9;
+
+let participante = null;
+let secciones = ['s0','s1','s2','s3','s4','s5','s6','s7','s8'];
+let visitadas = new Set(['s0']);
+
+// ===== GLOSARIO (flip cards + match) =====
+const GLOSARIO = [
+  {t:"AMEF", d:"Herramienta de análisis para identificar, evaluar y mitigar posibles fallas en productos, procesos o sistemas."},
+  {t:"Riesgo / Falla potencial", d:"Efecto de la incertidumbre sobre los objetivos de calidad. Situación que puede afectar la capacidad de alcanzar las metas."},
+  {t:"Severidad (SEV)", d:"Importancia o gravedad del efecto del modo de falla potencial para el cliente. Aumenta con la insatisfacción."},
+  {t:"Ocurrencia (OCU)", d:"Posibilidad de que una causa potencial de falla se produzca y dé lugar al modo de falla."},
+  {t:"Detección (DET)", d:"Probabilidad de que la causa o el modo de falla sea detectado con antelación por los controles actuales."},
+  {t:"IPR", d:"Índice de Prioridad de Riesgo. Producto SEV × OCU × DET. Va asociado a la prioridad de intervención."},
+  {t:"Controles actuales", d:"Todos los controles existentes para prevenir las causas de la falla y detectar el efecto resultante."},
+  {t:"Riesgo inherente", d:"Nivel de riesgo que existe en un proceso antes de implementar controles o medidas de mitigación."},
+  {t:"Riesgo residual", d:"Nivel de riesgo que queda después de aplicar todas las medidas de control o mitigación."},
+  {t:"Partes interesadas", d:"Personas, grupos o entidades que pueden afectar o verse afectadas por el desempeño del SGC."},
+  {t:"Acciones correctoras", d:"Medidas para eliminar la causa de una no conformidad y evitar que vuelva a ocurrir."},
+  {t:"Contexto", d:"Factores internos y externos que influyen en la capacidad de la organización para alcanzar los resultados."}
+];
+
+function renderFlipCards(){
+  const grid = document.getElementById('flipGrid');
+  grid.innerHTML = GLOSARIO.map((g,i)=>`
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-face flip-front">
+          <div class="term">${g.t}</div>
+          <div class="hint">TOCA PARA VER</div>
+        </div>
+        <div class="flip-face flip-back">${g.d}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== MATCH GAME =====
+const MATCH_SET = [
+  {t:"IPR", d:"Producto SEV × OCU × DET"},
+  {t:"Severidad", d:"Gravedad del efecto para el cliente"},
+  {t:"Ocurrencia", d:"Probabilidad de que la causa se produzca"},
+  {t:"Detección", d:"Capacidad del control de detectar la falla"},
+  {t:"Riesgo residual", d:"Riesgo que queda después de las acciones"},
+  {t:"Riesgo inherente", d:"Riesgo antes de aplicar controles"}
+];
+let matchSelTerm = null, matchSelDef = null, matchedCount = 0;
+function shuffle(a){return a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1])}
+
+function renderMatch(){
+  const terms = MATCH_SET.map((m,i)=>({k:i,v:m.t}));
+  const defs = shuffle(MATCH_SET.map((m,i)=>({k:i,v:m.d})));
+  document.getElementById('matchTerms').innerHTML = terms.map(t=>`<div class="match-item" data-side="t" data-k="${t.k}">${t.v}</div>`).join('');
+  document.getElementById('matchDefs').innerHTML = defs.map(d=>`<div class="match-item" data-side="d" data-k="${d.k}">${d.v}</div>`).join('');
+  document.querySelectorAll('.match-item').forEach(el=>el.addEventListener('click',matchClick));
+  matchedCount = 0;
+  document.getElementById('matchStatus').classList.remove('show');
+}
+function matchClick(e){
+  const el = e.currentTarget;
+  if(el.classList.contains('matched')) return;
+  const side = el.dataset.side;
+  if(side==='t'){
+    document.querySelectorAll('.match-item[data-side="t"].selected').forEach(x=>x.classList.remove('selected'));
+    el.classList.add('selected');
+    matchSelTerm = el;
+  } else {
+    document.querySelectorAll('.match-item[data-side="d"].selected').forEach(x=>x.classList.remove('selected'));
+    el.classList.add('selected');
+    matchSelDef = el;
+  }
+  if(matchSelTerm && matchSelDef){
+    const status = document.getElementById('matchStatus');
+    if(matchSelTerm.dataset.k === matchSelDef.dataset.k){
+      matchSelTerm.classList.add('matched');matchSelTerm.classList.remove('selected');
+      matchSelDef.classList.add('matched');matchSelDef.classList.remove('selected');
+      matchedCount++;
+      status.className='match-status show ok';
+      status.textContent = matchedCount===MATCH_SET.length ? '¡Excelente! Completaste todos los pares.' : `Correcto. ${matchedCount} de ${MATCH_SET.length}.`;
+    } else {
+      status.className='match-status show no';
+      status.textContent='No coincide. Intenta de nuevo.';
+      setTimeout(()=>{
+        if(matchSelTerm) matchSelTerm.classList.remove('selected');
+        if(matchSelDef) matchSelDef.classList.remove('selected');
+      },800);
+    }
+    matchSelTerm = null; matchSelDef = null;
+  }
+}
+
+// ===== TABS =====
+function setupTabs(){
+  document.querySelectorAll('.tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      const group = tab.parentElement;
+      group.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      // Find tab panels in the same section
+      const section = group.closest('.section');
+      if(tab.dataset.tab){
+        section.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+        section.querySelector('#'+tab.dataset.tab).classList.add('active');
+      } else if(tab.dataset.scale){
+        cambiarEscala(tab.dataset.scale);
+      } else if(tab.dataset.case){
+        section.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+        section.querySelector('#'+tab.dataset.case).classList.add('active');
+      }
+    });
+  });
+}
+
+// ===== STEPPER =====
+const PASOS = [
+  {code:"7.1 IDENTIFICACIÓN", t:"Identificar los modos de falla potencial", d:"El Gerente o Jefe junto a su equipo identifica los modos de falla considerando el alcance de los sistemas de gestión, el contexto de la organización, las partes interesadas, las políticas, no conformidades, gestión del cambio y los pasos clave de los subprocesos."},
+  {code:"7.2 ANÁLISIS", t:"Analizar y valorizar el fallo potencial", d:"Se aplica la fórmula IPR = SEV × OCU × DET, calificando cada variable según las escalas oficiales. El resultado representa la máxima vulnerabilidad si el riesgo no se trata."},
+  {code:"7.3 ACCIONES", t:"Definir e implementar acciones", d:"El Gerente o Jefe define acciones correctivas o preventivas con fecha máxima. Crítica Alta exige tratamiento inmediato; Crítica Media admite mediano plazo (≤5 meses); Crítica Baja se planifica a largo plazo."},
+  {code:"7.4 SEGUIMIENTO", t:"Realizar seguimiento del fallo potencial", d:"El Especialista o Coordinador da seguimiento periódico a los fallos Crítica Alta (≥150) y Crítica Media (79-149). Si no se cumple la fecha, el Gerente justifica y solicita prórroga."},
+  {code:"7.5 RIESGO RESIDUAL", t:"Analizar el riesgo residual", d:"Una vez implementados los controles, se vuelve a aplicar IPR = SEV × OCU × DET. Regla absoluta: el residual nunca podrá ser superior al de la situación actual."},
+  {code:"7.6 SOCIALIZACIÓN", t:"Socializar la información", d:"Los Gerentes y Jefes socializan a las partes interesadas la información de los fallos potenciales identificados y tratados, para que conozcan las actividades para evitar su materialización."},
+  {code:"7.7 VERIFICACIÓN", t:"Verificar eficacia", d:"El Especialista o Coordinador revisa periódicamente todas las acciones implementadas. La eficacia se demuestra cuando el riesgo residual es menor al de la situación actual. Si no fueron eficaces, se definen nuevas acciones."}
+];
+let stepIdx = 0;
+function renderStepper(){
+  const nav = document.getElementById('stepperNav');
+  nav.innerHTML = PASOS.map((p,i)=>`<button class="step-dot${i===stepIdx?' active':''}${i<stepIdx?' done':''}" onclick="gotoStep(${i})">${i+1}</button>`).join('');
+  const c = document.getElementById('stepperContent');
+  const p = PASOS[stepIdx];
+  c.innerHTML = `<div class="code">${p.code}</div><h3>${p.t}</h3><p>${p.d}</p>`;
+  document.getElementById('stepPrev').disabled = stepIdx===0;
+  document.getElementById('stepNext').disabled = stepIdx===PASOS.length-1;
+  document.getElementById('stepNext').textContent = stepIdx===PASOS.length-1 ? '✓ Final' : 'Siguiente paso →';
+  document.getElementById('stepLabel').textContent = `Paso ${stepIdx+1} de ${PASOS.length}`;
+}
+function gotoStep(i){stepIdx=i;renderStepper()}
+function prevStep(){if(stepIdx>0){stepIdx--;renderStepper()}}
+function nextStep(){if(stepIdx<PASOS.length-1){stepIdx++;renderStepper()}}
+
+// ===== ESCALAS EXPLORER =====
+const SCALES = {
+  sev: {
+    title:"Severidad (SEV)",
+    levels:[
+      {v:[1], lab:"MUY BAJA", crit:"No es razonable esperar que este fallo origine efecto real. El cliente ni se daría cuenta del fallo."},
+      {v:[2,3], lab:"BAJA", crit:"Ligero inconveniente al cliente. Pequeño deterioro del rendimiento sin importancia. Fácilmente subsanable."},
+      {v:[4,5,6], lab:"MODERADA", crit:"El fallo produce cierto disgusto e insatisfacción en el cliente. El cliente observará deterioro en el rendimiento del sistema."},
+      {v:[7,8], lab:"ALTA", crit:"El fallo puede ser crítico y verse inutilizado el sistema. Produce un grado de insatisfacción elevado."},
+      {v:[9,10], lab:"MUY ALTA", crit:"Fallo muy crítico que afecta funcionamiento de seguridad o involucra incumplimiento serio de normas reglamentarias."}
+    ]
+  },
+  ocu: {
+    title:"Ocurrencia (OCU)",
+    levels:[
+      {v:[1], lab:"MUY BAJA", crit:"Improbable. Ningún fallo se asocia a procesos casi idénticos, ni se ha dado nunca en el pasado, pero es concebible."},
+      {v:[2,3], lab:"BAJA", crit:"Fallos aislados en procesos similares. Razonablemente esperable en la vida del sistema aunque poco probable."},
+      {v:[4,5], lab:"MODERADA", crit:"Defecto aparecido ocasionalmente en procesos similares. Aparecerá algunas veces en la vida del sistema."},
+      {v:[6,7,8], lab:"ALTA", crit:"El fallo se ha presentado con cierta frecuencia en el pasado en procesos similares."},
+      {v:[9,10], lab:"MUY ALTA", crit:"Fallo casi inevitable. Es seguro que el fallo se producirá frecuentemente."}
+    ]
+  },
+  det: {
+    title:"Detección (DET)",
+    levels:[
+      {v:[1], lab:"MUY ALTA", crit:"El defecto es obvio. Resulta muy improbable que no sea detectado por los controles existentes."},
+      {v:[2,3], lab:"ALTA", crit:"El defecto, aunque obvio, podría escapar a un primer control, pero sería detectado con seguridad a posteriori."},
+      {v:[4,5,6], lab:"MEDIANA", crit:"El defecto es detectable y posiblemente no llegue al cliente. Se detecta en los últimos estadios."},
+      {v:[7,8], lab:"PEQUEÑA", crit:"El defecto es de tal naturaleza que resulta difícil detectarlo con los procedimientos establecidos."},
+      {v:[9,10], lab:"IMPROBABLE", crit:"El defecto no puede detectarse. Casi seguro que lo percibirá el cliente final."}
+    ]
+  }
+};
+let scaleActive = 'sev';
+function cambiarEscala(k){
+  scaleActive = k;
+  document.getElementById('scaleTitle').textContent = SCALES[k].title;
+  actualizarScale();
+}
+function actualizarScale(){
+  const v = +document.getElementById('scaleSlider').value;
+  const lvl = SCALES[scaleActive].levels.find(l => l.v.includes(v));
+  document.getElementById('scaleLevel').textContent = lvl.lab;
+  document.getElementById('scaleValue').textContent = v;
+  document.getElementById('scaleCrit').textContent = lvl.crit;
+}
+document.getElementById('scaleSlider').addEventListener('input', actualizarScale);
+
+// ===== CALCULADORA + MAPA =====
+const DESC_S = {1:"Muy Baja: imperceptible.",2:"Baja: apenas perceptible.",3:"Baja: apenas perceptible.",4:"Moderada: cierto disgusto.",5:"Moderada: cierto disgusto.",6:"Moderada: cierto disgusto.",7:"Alta: fallo crítico.",8:"Alta: fallo crítico.",9:"Muy Alta: incumplimiento normativo.",10:"Muy Alta: incumplimiento grave."};
+const DESC_O = {1:"Muy Baja: improbable.",2:"Baja: aislada.",3:"Baja: aislada.",4:"Moderada: ocasional.",5:"Moderada: ocasional.",6:"Alta: con frecuencia.",7:"Alta: con frecuencia.",8:"Alta: con frecuencia.",9:"Muy Alta: casi inevitable.",10:"Muy Alta: casi inevitable."};
+const DESC_D = {1:"Muy Alta: defecto obvio.",2:"Alta: detectable.",3:"Alta: detectable.",4:"Mediana: no siempre llega.",5:"Mediana: no siempre llega.",6:"Mediana: no siempre llega.",7:"Pequeña: difícil detectar.",8:"Pequeña: difícil detectar.",9:"Improbable: lo verá el cliente.",10:"Improbable: lo verá el cliente."};
+
+function actualizarCalc(){
+  const s=+document.getElementById('r-s').value, o=+document.getElementById('r-o').value, d=+document.getElementById('r-d').value;
+  const npr=s*o*d;
+  document.getElementById('v-s').textContent=s;document.getElementById('v-o').textContent=o;document.getElementById('v-d').textContent=d;
+  document.getElementById('d-s').textContent=DESC_S[s];document.getElementById('d-o').textContent=DESC_O[o];document.getElementById('d-d').textContent=DESC_D[d];
+  document.getElementById('v-npr').textContent=npr;
+  document.getElementById('v-formula').textContent=`IPR = ${s} × ${o} × ${d}`;
+  const lvl = document.getElementById('v-level'), rec=document.getElementById('v-recom');
+  lvl.classList.remove('lv-low','lv-med','lv-high');
+  if(npr<=78){lvl.textContent='CRÍTICA BAJA';lvl.classList.add('lv-low');rec.textContent='Planificar tratamiento a largo plazo. Se mantiene bajo monitoreo.';}
+  else if(npr<=149){lvl.textContent='CRÍTICA MEDIA';lvl.classList.add('lv-med');rec.textContent='Planificar tratamiento a mediano plazo (no mayor a 5 meses).';}
+  else{lvl.textContent='CRÍTICA ALTA';lvl.classList.add('lv-high');rec.textContent='Tratar inmediatamente. Definir acciones correctivas de forma inmediata.';}
+  // Posicionar marker en mapa: x = (10-OCU)/9 → OCU alta a la izquierda; y = (10-SEV)/9 → SEV alta arriba
+  const marker = document.getElementById('marker');
+  if(marker){
+    const xPct = ((10 - o) / 9) * 100;
+    const yPct = ((10 - s) / 9) * 100;
+    marker.style.left = xPct + '%';
+    marker.style.top = yPct + '%';
+    marker.textContent = npr;
+  }
+}
+function setPreset(s,o,d){document.getElementById('r-s').value=s;document.getElementById('r-o').value=o;document.getElementById('r-d').value=d;actualizarCalc()}
+
+// ===== HEATMAP CELL INFO =====
+function cellInfo(k){
+  const info = {
+    crit: {t:"Crítica Alta · IPR ≥ 150", d:"Severidad alta + Ocurrencia alta + Calidad deficiente. Tratar inmediatamente con acciones de mejora y de control. Es el cuadrante prioritario para la organización."},
+    'med-sa': {t:"Crítica Media · IPR 79-149 (SEV alta)", d:"Severidad alta pero Ocurrencia baja. La calidad es muy buena pero el impacto potencial sigue siendo alto. Requiere acción de control a mediano plazo."},
+    'med-ob': {t:"Crítica Media · IPR 79-149 (OCU alta)", d:"Ocurrencia alta pero Severidad baja. La frecuencia obliga a actuar aunque el impacto unitario sea menor. Acción de control a mediano plazo."},
+    low: {t:"Crítica Baja · IPR ≤ 78", d:"Baja Severidad y baja Ocurrencia. Calidad muy buena. Se mantiene bajo monitoreo. Oportunidad de mejora continua sin urgencia."}
+  };
+  const i = info[k];
+  document.getElementById('cellTitle').textContent = i.t;
+  document.getElementById('cellText').textContent = i.d;
+  document.getElementById('cellDetail').style.display='block';
+}
+
+// ===== QUIZ =====
+const PREGUNTAS = [
+  {q:"¿Con qué frecuencia mínima debe realizarse la gestión de riesgos según el ASQ-PRO-06?",o:["Cada mes","Una vez al año o cuando haya cambios","Solo cuando ocurra una falla","Cada cinco años"],c:1,e:"El procedimiento establece como mínimo una vez al año o cuando se identifiquen nuevos riesgos, cambios en el contexto, alcance, partes interesadas o sistemas de gestión."},
+  {q:"¿Cuál es la fórmula del IPR?",o:["SEV + OCU + DET","SEV × OCU ÷ DET","SEV × OCU × DET","SEV² × OCU × DET"],c:2,e:"El IPR (Índice de Prioridad de Riesgo) es el producto de los tres factores: Severidad × Ocurrencia × Detección."},
+  {q:"Un valor de 9 o 10 en Severidad (nivel Muy Alta) corresponde a:",o:["Repercusiones imperceptibles","Defectos de relativa importancia","Fallo crítico con insatisfacción elevada","Incumplimiento serio o grave de normas reglamentarias"],c:3,e:"Según la escala oficial, el nivel Muy Alta (9-10) corresponde a fallos que afectan la seguridad del producto o proceso o involucran seriamente el incumplimiento de normas reglamentarias. 'Fallo crítico con insatisfacción elevada' corresponde al nivel Alta (7-8)."},
+  {q:"En Detección, ¿qué significa un valor de 1?",o:["El defecto no puede detectarse","Defecto obvio, muy improbable que escape","Depende del criterio individual","Solo se detecta con el reclamo"],c:1,e:"En Detección la escala funciona al revés: 1 es el mejor escenario (defecto obvio, casi imposible que escape a los controles) y 10 es el peor (no se detecta y llega al cliente final)."},
+  {q:"Un IPR de 100 se clasifica como:",o:["Crítica Baja","Crítica Media","Crítica Alta","Sin clasificación"],c:1,e:"Los umbrales oficiales son: ≤78 Crítica Baja, 79-149 Crítica Media, ≥150 Crítica Alta. Un IPR de 100 cae en el rango 79-149."},
+  {q:"Un riesgo Crítica Alta (IPR ≥ 150) requiere:",o:["Planificación a largo plazo","Monitoreo sin acción","Tratamiento inmediato","Esperar la próxima revisión"],c:2,e:"El procedimiento exige tratar inmediatamente los riesgos Crítica Alta y definir acciones correctivas de forma inmediata."},
+  {q:"¿Quién da seguimiento a la implementación y eficacia de las acciones?",o:["El cliente","El Gerente o Jefe del proceso","El Especialista o Coordinador de Procesos","Cualquier colaborador"],c:2,e:"Según el numeral 7.4, el Especialista o Coordinador de Procesos da seguimiento periódico a las acciones. El Gerente o Jefe define las acciones, pero el seguimiento es del rol especialista."},
+  {q:"El riesgo residual es:",o:["El riesgo antes de aplicar controles","El riesgo después de aplicar las medidas","Sinónimo de inherente","El de procesos auxiliares"],c:1,e:"El riesgo residual es el nivel que queda después de aplicar todas las medidas de control o mitigación. El riesgo inherente es el que existe antes de aplicar controles."},
+  {q:"La ponderación del riesgo residual respecto a la situación actual:",o:["Puede ser mayor","Nunca podrá ser superior","Debe duplicarse","Es indiferente"],c:1,e:"Es una regla absoluta del procedimiento: el riesgo residual nunca podrá ser superior al de la situación actual. Si fuera mayor, las acciones implementadas no estarían siendo eficaces."},
+  {q:"En el caso TCL-ANX-15, 'Contratación de servicios' tuvo SEV=8, OCU=3, DET=3. Su nivel es:",o:["Crítica Alta","Crítica Media","Crítica Baja","No se puede clasificar"],c:2,e:"IPR = 8 × 3 × 3 = 72. Como 72 ≤ 78, se clasifica como Crítica Baja según los umbrales del procedimiento."}
+];
+let respuestas = new Array(PREGUNTAS.length).fill(null);
+function renderQuiz(){
+  const c = document.getElementById('quiz-container');
+  c.innerHTML='';
+  PREGUNTAS.forEach((p,i)=>{
+    const div = document.createElement('div');
+    div.className='quiz-q';
+    div.innerHTML = `<h4><span class="q-num">P${i+1}.</span>${p.q}</h4>` + p.o.map((op,j)=>`<div class="quiz-opt" data-q="${i}" data-o="${j}">${op}</div>`).join('') + `<div class="quiz-feedback" id="fb-${i}"></div>`;
+    c.appendChild(div);
+  });
+  c.querySelectorAll('.quiz-opt').forEach(opt=>opt.addEventListener('click',()=>{
+    const qi=+opt.dataset.q,oi=+opt.dataset.o;
+    respuestas[qi]=oi;
+    opt.parentElement.querySelectorAll('.quiz-opt').forEach(x=>x.classList.remove('selected'));
+    opt.classList.add('selected');
+  }));
+}
+async function calificarQuiz(){
+  let correctas=0;
+  PREGUNTAS.forEach((p,i)=>{
+    const fb=document.getElementById('fb-'+i);
+    const opts=document.querySelectorAll(`.quiz-opt[data-q="${i}"]`);
+    opts.forEach((o,j)=>{
+      o.classList.remove('correct','wrong');
+      if(j===p.c) o.classList.add('correct');
+      if(respuestas[i]===j && j!==p.c) o.classList.add('wrong');
+    });
+    if(respuestas[i]===p.c){
+      correctas++;
+      fb.className='quiz-feedback show ok';
+      fb.innerHTML='<strong>✓ Correcto.</strong> '+p.e;
+    } else if(respuestas[i]!==null){
+      fb.className='quiz-feedback show no';
+      fb.innerHTML='<strong>✗ Incorrecto.</strong> '+p.e;
+    } else {
+      fb.className='quiz-feedback show no';
+      fb.innerHTML='<strong>Sin responder.</strong> '+p.e;
+    }
+  });
+  document.getElementById('quiz-score').textContent = correctas+'/10';
+  document.getElementById('quiz-msg').textContent = correctas>=9?'Excelente dominio.':correctas>=7?'Buen nivel. Repasa las marcadas.':correctas>=5?'Aceptable. Revisa las secciones 2, 3 y 5.':'Conviene revisar la capacitación.';
+  document.getElementById('quiz-result').classList.add('show');
+  if(participante){participante.quiz={puntaje:correctas,respuestas:[...respuestas],fecha:new Date().toISOString()};await actualizarParticipante();}
+}
+function reiniciarQuiz(){respuestas=new Array(PREGUNTAS.length).fill(null);document.getElementById('quiz-result').classList.remove('show');renderQuiz()}
+async function finalizar(){if(participante){participante.finalizado=true;participante.fin=new Date().toISOString();await actualizarParticipante();}alert('Capacitación finalizada. Tu registro fue guardado.')}
+
+// ===== NAVEGACIÓN =====
+function ir(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{n.classList.remove('active');if(n.dataset.target===id)n.classList.add('active');});
+  visitadas.add(id);
+  const idx=secciones.indexOf(id);
+  for(let i=0;i<idx;i++)visitadas.add(secciones[i]);
+  document.querySelectorAll('.nav-item').forEach(n=>{if(visitadas.has(n.dataset.target)&&n.dataset.target!==id)n.classList.add('done');});
+  document.getElementById('progressBar').style.width = ((idx+1)/TOTAL_SECCIONES*100)+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+  actualizarParticipante();
+}
+
+// ===== REGISTRO =====
+async function registrar(){
+  const nombre=document.getElementById('g-nombre').value.trim();
+  const area=document.getElementById('g-area').value;
+  const cargo=document.getElementById('g-cargo').value.trim();
+  const err=document.getElementById('g-err');
+  if(!nombre||nombre.length<3){err.textContent='Ingresa tu nombre completo.';return;}
+  if(!area){err.textContent='Selecciona tu unidad.';return;}
+  if(!cargo){err.textContent='Indica tu cargo o rol.';return;}
+  err.textContent='';
+  const id='p_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+  participante={id,nombre,area,cargo,inicio:new Date().toISOString(),secciones:['s0'],quiz:null,finalizado:false};
+  try{if(typeof window.storage!=='undefined'&&window.storage)await window.storage.set(STORAGE_KEY_PREFIX+id,JSON.stringify(participante),true);}catch(e){}
+  document.getElementById('userLabel').textContent=nombre.split(' ')[0]+' · '+area;
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').classList.add('active');
+  initApp();
+}
+async function actualizarParticipante(){
+  if(!participante)return;
+  participante.secciones=Array.from(visitadas);
+  try{if(typeof window.storage!=='undefined'&&window.storage)await window.storage.set(STORAGE_KEY_PREFIX+participante.id,JSON.stringify(participante),true);}catch(e){}
+}
+
+// ===== ADMIN =====
+function abrirAdmin(){document.getElementById('admin').classList.add('show')}
+function cerrarAdmin(){document.getElementById('admin').classList.remove('show');document.getElementById('admin-login').style.display='block';document.getElementById('admin-content').style.display='none';document.getElementById('admin-pass').value='';document.getElementById('admin-err').textContent=''}
+async function validarAdmin(){const k=document.getElementById('admin-pass').value;if(k!==ADMIN_KEY){document.getElementById('admin-err').textContent='Clave incorrecta.';return;}document.getElementById('admin-login').style.display='none';document.getElementById('admin-content').style.display='block';await refrescarLista()}
+async function obtenerParticipantes(){const list=[];try{if(typeof window.storage!=='undefined'&&window.storage){const r=await window.storage.list(STORAGE_KEY_PREFIX,true);if(r&&r.keys)for(const k of r.keys){try{const v=await window.storage.get(k,true);if(v&&v.value)list.push(JSON.parse(v.value));}catch(e){}}}}catch(e){}return list.sort((a,b)=>a.inicio.localeCompare(b.inicio))}
+async function refrescarLista(){
+  const list=await obtenerParticipantes();
+  document.getElementById('admin-count').textContent=list.length;
+  const cq=list.filter(p=>p.quiz);
+  document.getElementById('admin-avg').textContent=cq.length?(cq.reduce((a,p)=>a+p.quiz.puntaje,0)/cq.length).toFixed(1)+'/10':'—';
+  const tb=document.getElementById('admin-tbody');tb.innerHTML='';
+  if(!list.length){document.getElementById('admin-empty').style.display='block';return}
+  document.getElementById('admin-empty').style.display='none';
+  list.forEach(p=>{
+    const tr=document.createElement('tr');
+    const fecha=new Date(p.inicio).toLocaleString('es-EC',{dateStyle:'short',timeStyle:'short'});
+    const quiz=p.quiz?p.quiz.puntaje+'/10':'—';
+    const estado=p.finalizado?'<span style="color:var(--green);font-weight:600">✓ Finalizado</span>':p.quiz?'<span style="color:var(--amber)">Quiz hecho</span>':`<span style="color:var(--muted)">En curso (${(p.secciones||[]).length}/${TOTAL_SECCIONES})</span>`;
+    tr.innerHTML=`<td>${fecha}</td><td><strong>${p.nombre}</strong></td><td>${p.area}</td><td>${p.cargo}</td><td style="text-align:center">${quiz}</td><td>${estado}</td>`;
+    tb.appendChild(tr);
+  });
+}
+async function exportarCSV(){
+  const list=await obtenerParticipantes();
+  if(!list.length){alert('No hay participantes registrados.');return}
+  const head=['Fecha inicio','Nombre','Unidad','Cargo','Secciones','Quiz','Fecha quiz','Finalizado','Fecha fin'];
+  const rows=list.map(p=>[p.inicio,p.nombre,p.area,p.cargo,(p.secciones||[]).length+'/'+TOTAL_SECCIONES,p.quiz?p.quiz.puntaje:'',p.quiz?p.quiz.fecha:'',p.finalizado?'SI':'NO',p.fin||'']);
+  const csv=[head,...rows].map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='participantes_amef_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+async function limpiarRegistros(){
+  if(!confirm('Esto eliminará TODOS los registros. ¿Continuar?'))return;
+  try{if(typeof window.storage!=='undefined'&&window.storage){const r=await window.storage.list(STORAGE_KEY_PREFIX,true);if(r&&r.keys)for(const k of r.keys){try{await window.storage.delete(k,true)}catch(e){}}}}catch(e){}
+  await refrescarLista();
+}
+function descargarHTML(){
+  const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='capacitacion_amef_transoceanica.html';
+  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+
+// ===== INIT =====
+function initApp(){
+  renderFlipCards();
+  renderMatch();
+  renderStepper();
+  setupTabs();
+  renderQuiz();
+  actualizarCalc();
+  document.querySelectorAll('.nav-item').forEach(n=>n.addEventListener('click',()=>ir(n.dataset.target)));
+  document.getElementById('progressBar').style.width = (1/TOTAL_SECCIONES*100)+'%';
+}
+
+// ===== ACCESO ADMIN OCULTO =====
+// Atajo de teclado Ctrl+Shift+A (Windows/Linux) o Cmd+Shift+A (Mac)
+document.addEventListener('keydown', function(e){
+  if((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')){
+    e.preventDefault();
+    abrirAdmin();
+  }
+});
+</script>
+</body>
+</html>
